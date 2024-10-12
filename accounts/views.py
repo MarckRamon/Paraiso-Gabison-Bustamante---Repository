@@ -37,3 +37,6 @@ def logout_view(request):
 def dashboard(request):
     user = request.user  # Get the logged-in user's information
     return render(request, 'inventory/dashboard.html', {'user': user})
+
+
+# Testing if commit is working
