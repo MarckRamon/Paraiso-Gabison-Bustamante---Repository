@@ -5,15 +5,12 @@
 <link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
 
 <div class="container">
-   
-
-    <!-- Main Content -->
     <main class="main-content">
         <div class="content-header">
             <h1>Inventory</h1>
             <div class="search-add">
                 <input type="text" placeholder="Search">
-                <button class="add-product">Add New Product</button>
+                <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
             </div>
         </div>
         <table class="inventory-table">
@@ -38,8 +35,8 @@
                     <td>₱{{ item.price|floatformat:2 }}</td>
                     <td>{{ item.expiry_days }} Days</td>
                     <td>
-                        <button class="edit" onclick="editItem"><i class="fas fa-edit"></i></button>
-                        <button class="delete" onclick="deleteItem"><i class="fas fa-trash"></i></button>
+                        <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
+                        <button class="delete" onclick="deleteItem('{{ item.id }}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
                 {% empty %}
@@ -51,17 +48,57 @@
         </table>
         <button class="go-back" onclick="history.back()">Go Back</button>
     </main>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" style="display:none;">
+        <div class="modal-content">
+            <span onclick="closeAddProductModal()" class="close">&times;</span>
+            <h2>Add New Product</h2>
+            <form id="addProductForm" onsubmit="submitAddProduct(event)">
+                <input type="text" id="itemName" placeholder="Item Name" required>
+                <select id="itemCategory" required>
+                    <option value="">Select Category</option>
+                    <option value="Category1">Category 1</option>
+                    <option value="Category2">Category 2</option>
+                    <!-- Add more categories as needed -->
+                </select>
+                <input type="number" id="itemQuantity" placeholder="Quantity" required>
+                <input type="number" id="itemPrice" placeholder="Price" required>
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
-    function editItem(itemId) {
-        // Implement edit functionality
-        console.log('Edit item:', itemId);
+    function openAddProductModal() {
+        document.getElementById('addProductModal').style.display = 'block';
     }
 
-    function deleteItem(itemId) {
-        // Implement delete functionality
-        console.log('Delete item:', itemId);
+    function closeAddProductModal() {
+        document.getElementById('addProductModal').style.display = 'none';
     }
+
+    function submitAddProduct(event) {
+        event.preventDefault();
+        const name = document.getElementById('itemName').value;
+        const category = document.getElementById('itemCategory').value;
+        const quantity = document.getElementById('itemQuantity').value;
+        const price = document.getElementById('itemPrice').value;
+
+        // Implement AJAX call to submit the form data to the server
+        console.log('Add product:', { name, category, quantity, price });
+        closeAddProductModal();
+    }
+
+    function editItem(itemId) {
+    var itemId = JSON.parse(document.getElementById('item-id').textContent);
+    console.log('Edit item:', itemId);
+}
+
+function deleteItem(itemId) {
+    var itemId = JSON.parse(document.getElementById('item-id').textContent);
+    console.log('Delete item:', itemId);
+}
 </script>
 {% endblock %}
