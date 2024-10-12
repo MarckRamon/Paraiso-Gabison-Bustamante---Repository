@@ -25,7 +25,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="inventoryTableBody">
                 {% for item in inventory_items %}
                 <tr>
                     <td>{{ item.id }}</td>
@@ -38,7 +38,7 @@
                         <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
                         <button class="delete" onclick="deleteItem('{{ item.id }}')"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
+                </tr>   
                 {% empty %}
                 <tr>
                     <td colspan="7">No inventory items found.</td>
@@ -50,25 +50,85 @@
     </main>
 
     <!-- Add Product Modal -->
-    <div id="addProductModal" style="display:none;">
+    <div id="addProductModal" class="modal">
         <div class="modal-content">
             <span onclick="closeAddProductModal()" class="close">&times;</span>
             <h2>Add New Product</h2>
             <form id="addProductForm" onsubmit="submitAddProduct(event)">
-                <input type="text" id="itemName" placeholder="Item Name" required>
-                <select id="itemCategory" required>
-                    <option value="">Select Category</option>
-                    <option value="Category1">Category 1</option>
-                    <option value="Category2">Category 2</option>
-                    <!-- Add more categories as needed -->
-                </select>
-                <input type="number" id="itemQuantity" placeholder="Quantity" required>
-                <input type="number" id="itemPrice" placeholder="Price" required>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required><br><br>
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" required><br><br>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required><br><br>
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" required><br><br>
+                <label for="expiry_days">Expiry Days:</label>
+                <input type="number" id="expiry_days" name="expiry_days" required><br><br>
                 <button type="submit">Add Product</button>
             </form>
         </div>
     </div>
 </div>
+
+<div id="editProductModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeEditProductModal()" class="close">&times;</span>
+        <h2>Edit Product</h2>
+        <form id="editProductForm" onsubmit="submitEditProduct(event)">
+            <input type="hidden" id="editItemId" name="editItemId">
+            <label for="editName">Name:</label>
+            <input type="text" id="editName" name="editName" required><br><br>
+            <label for="editCategory">Category:</label>
+            <input type="text" id="editCategory" name="editCategory" required><br><br>
+            <label for="editQuantity">Quantity:</label>
+            <input type="number" id="editQuantity" name="editQuantity" required><br><br>
+            <label for="editPrice">Price:</label>
+            <input type="number" id="editPrice" name="editPrice" step="0.01" required><br><br>
+            <label for="editExpiryDays">Expiry Days:</label>
+            <input type="number" id="editExpiryDays" name="editExpiryDays" required><br><br>
+            <button type="submit">Update Product</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
 
 <script>
     function openAddProductModal() {
@@ -79,26 +139,166 @@
         document.getElementById('addProductModal').style.display = 'none';
     }
 
-    function submitAddProduct(event) {
-        event.preventDefault();
-        const name = document.getElementById('itemName').value;
-        const category = document.getElementById('itemCategory').value;
-        const quantity = document.getElementById('itemQuantity').value;
-        const price = document.getElementById('itemPrice').value;
+    const addProductUrl = "{% url 'add_product' %}";
 
-        // Implement AJAX call to submit the form data to the server
-        console.log('Add product:', { name, category, quantity, price });
+    function submitAddProduct(event) {
+    event.preventDefault();
+    const formData = {
+        name: document.getElementById('name').value,
+        category: document.getElementById('category').value,
+        quantity: document.getElementById('quantity').value,
+        price: document.getElementById('price').value,
+        expiry_days: document.getElementById('expiry_days').value,
+    };
+
+    fetch(addProductUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Add product:', data);
         closeAddProductModal();
+        addProductToTable(data);
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function addProductToTable(product) {
+    const tableBody = document.getElementById('inventoryTableBody');
+    const newRow = tableBody.insertRow();
+    newRow.setAttribute('data-id', product.id);
+    newRow.innerHTML = `
+        <td>${product.id}</td>
+        <td>${product.name}</td>
+        <td>${product.category}</td>
+        <td>${product.quantity}</td>
+        <td>₱${parseFloat(product.price).toFixed(2)}</td>
+        <td>${product.expiry_days} Days</td>
+        <td>
+            <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
+            <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
+        </td>
+    `;
+        
+        // Remove "No inventory items found" row if it exists
+        const noItemsRow = tableBody.querySelector('tr td[colspan="7"]');
+        if (noItemsRow) {
+            noItemsRow.parentElement.remove();
+        }
     }
 
     function editItem(itemId) {
-    var itemId = JSON.parse(document.getElementById('item-id').textContent);
-    console.log('Edit item:', itemId);
+    // Fetch the item details
+    fetch(`/inventory/get-item/${itemId}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Populate the modal with the item details
+            document.getElementById('editItemId').value = data.id;
+            document.getElementById('editName').value = data.name;
+            document.getElementById('editCategory').value = data.category;
+            document.getElementById('editQuantity').value = data.quantity;
+            document.getElementById('editPrice').value = data.price;
+            document.getElementById('editExpiryDays').value = data.expiry_days;
+            
+            // Show the edit modal
+            document.getElementById('editProductModal').style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function submitEditProduct(event) {
+    event.preventDefault();
+    const itemId = document.getElementById('editItemId').value;
+    const formData = {
+        name: document.getElementById('editName').value,
+        category: document.getElementById('editCategory').value,
+        quantity: document.getElementById('editQuantity').value,
+        price: document.getElementById('editPrice').value,
+        expiry_days: document.getElementById('editExpiryDays').value,
+    };
+
+    fetch(`/inventory/edit-item/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Edit product:', data);
+        closeEditProductModal();
+        updateProductInTable(data);
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function deleteItem(itemId) {
-    var itemId = JSON.parse(document.getElementById('item-id').textContent);
-    console.log('Delete item:', itemId);
+    if (confirm('Are you sure you want to delete this item?')) {
+        fetch(`/inventory/delete-item/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Delete product:', data);
+            removeProductFromTable(itemId);
+        })
+        .catch(error => console.error('Error:', error));
+    }
 }
+
+function updateProductInTable(product) {
+    const row = document.querySelector(`tr[data-id="${product.id}"]`);
+    if (row) {
+        row.innerHTML = `
+            <td>${product.id}</td>
+            <td>${product.name}</td>
+            <td>${product.category}</td>
+            <td>${product.quantity}</td>
+            <td>₱${parseFloat(product.price).toFixed(2)}</td>
+            <td>${product.expiry_days} Days</td>
+            <td>
+                <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
+                <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+    }
+}
+
+function removeProductFromTable(itemId) {
+    const row = document.querySelector(`tr[data-id="${itemId}"]`);
+    if (row) {
+        row.remove();
+    }
+}
+
+function closeEditProductModal() {
+    document.getElementById('editProductModal').style.display = 'none';
+}
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 </script>
 {% endblock %}
