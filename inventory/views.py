@@ -13,5 +13,3 @@ def inventory_items(request):
     return render(request, 'inventory/inventory_items.html', {
         'inventory_items': inventory_items,
     })
-
-#KAPOYA NA OY
