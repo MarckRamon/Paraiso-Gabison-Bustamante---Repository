@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-700 text-white" x-data="{ open: true }">
+            <div class="flex items-center justify-between p-4 bg-indigo-800">
+                <h2 class="text-2xl font-semibold">Inventory MS</h2>
+                <button @click="open = !open" class="lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="mt-4" :class="{'hidden': !open, 'block': open}">
+                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="{% url 'dashboard' %}">
+                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                </a>
+                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="{% url 'inventory_items' %}">
+                    <i class="fas fa-boxes mr-2"></i> Inventory Items
+                </a>
+                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="#">
+                    <i class="fas fa-plus-circle mr-2"></i> Add Item
+                </a>
+                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="#">
+                    <i class="fas fa-chart-bar mr-2"></i> Reports
+                </a>
+                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <!-- Define the block where child templates will inject content -->
+            {% block content %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h1 class="text-3xl font-semibold mb-6">Welcome, {{ user.username }}</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-100 p-4 rounded-lg">
+                        <h2 class="text-xl font-semibold mb-2">User Information</h2>
+                        <p class="mb-2"><i class="fas fa-envelope mr-2"></i>Email: {{ user.email }}</p>
+                        <p class="mb-2"><i class="fas fa-user mr-2"></i>First Name: {{ user.first_name }}</p>
+                        <p><i class="fas fa-user mr-2"></i>Last Name: {{ user.last_name }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>

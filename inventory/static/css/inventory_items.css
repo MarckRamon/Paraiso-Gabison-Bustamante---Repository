@@ -1,0 +1,134 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #5046e4;
+    color: white;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.5;
+}
+
+.sidebar nav {
+    padding-top: 20px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.3s, background-color 0.3s;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.content-header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.search-add {
+    display: flex;
+    align-items: center;
+}
+
+.search-add input {
+    padding: 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.add-product {
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.inventory-table th, .inventory-table td {
+    border: 1px solid #e8e8e8;
+    padding: 12px;
+    text-align: left;
+}
+
+.inventory-table th {
+    background-color: #fafafa;
+    font-weight: 600;
+}
+
+.inventory-table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.edit, .delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.edit i {
+    color: #1890ff;
+}
+
+.delete i {
+    color: #ff4d4f;
+}
+
+.go-back {
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}

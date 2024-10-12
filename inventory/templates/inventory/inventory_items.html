@@ -1,0 +1,67 @@
+{% extends 'inventory/dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
+
+<div class="container">
+   
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Inventory</h1>
+            <div class="search-add">
+                <input type="text" placeholder="Search">
+                <button class="add-product">Add New Product</button>
+            </div>
+        </div>
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Expired In</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory_items %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₱{{ item.price|floatformat:2 }}</td>
+                    <td>{{ item.expiry_days }} Days</td>
+                    <td>
+                        <button class="edit" onclick="editItem"><i class="fas fa-edit"></i></button>
+                        <button class="delete" onclick="deleteItem"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No inventory items found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="go-back" onclick="history.back()">Go Back</button>
+    </main>
+</div>
+
+<script>
+    function editItem(itemId) {
+        // Implement edit functionality
+        console.log('Edit item:', itemId);
+    }
+
+    function deleteItem(itemId) {
+        // Implement delete functionality
+        console.log('Delete item:', itemId);
+    }
+</script>
+{% endblock %}
