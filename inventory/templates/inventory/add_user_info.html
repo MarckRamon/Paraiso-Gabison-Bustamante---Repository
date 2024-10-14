@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User Information</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mx-auto mt-5">
+        <h1 class="text-2xl mb-4">Add User Information</h1>
+        <form method="POST" action="{% url 'add_user_info' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block mb-1" for="email">Email:</label>
+                <input type="email" name="email" id="email" class="border rounded p-2 w-full" required>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1" for="first_name">First Name:</label>
+                <input type="text" name="first_name" id="first_name" class="border rounded p-2 w-full" required>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1" for="last_name">Last Name:</label>
+                <input type="text" name="last_name" id="last_name" class="border rounded p-2 w-full" required>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white rounded p-2">Add Information</button>
+        </form>
+    </div>
+</body>
+</html>

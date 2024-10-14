@@ -3,13 +3,25 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.models import User
+from django.contrib import messages
 from .models import InventoryItem
 import json
 
 @login_required
 def dashboard(request):
     user = request.user
-    return render(request, 'inventory/dashboard.html', {'user': user})
+    # Calculate KPIs
+    total_inventory_value = sum(item.quantity * item.price for item in InventoryItem.objects.all())
+    total_items_in_stock = sum(item.quantity for item in InventoryItem.objects.all())
+    low_stock_count = sum(1 for item in InventoryItem.objects.all() if item.quantity < 10)  # Example threshold for low stock
+
+    return render(request, 'inventory/dashboard.html', {
+        'user': user,
+        'total_inventory_value': total_inventory_value,
+        'total_items_in_stock': total_items_in_stock,
+        'low_stock_count': low_stock_count,
+    })
 
 def inventory_items(request):
     inventory_items = InventoryItem.objects.all()
@@ -49,7 +61,6 @@ def add_product(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
-    
 
 @login_required
 @csrf_exempt
@@ -100,13 +111,39 @@ def edit_item(request, item_id):
 
 @login_required
 @csrf_exempt
-@require_http_methods(["POST"])
+@require_http_methods(["DELETE"])  # Change to DELETE method
 def delete_item(request, item_id):
     try:
         item = InventoryItem.objects.get(id=item_id)
         item.delete()
-        return JsonResponse({'message': 'Item deleted successfully'})
+        return JsonResponse({'message': 'Item deleted successfully'}, status=204)
     except InventoryItem.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def edit_user_info(request):
+    user = request.user
+    if request.method == 'POST':
+        user.email = request.POST.get('email', user.email)
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.save()
+        messages.success(request, 'User information updated successfully!')
+        return redirect('dashboard')
+    
+    return render(request, 'inventory/edit_user_info.html', {'user': user})
+
+@login_required
+def add_user_info(request):
+    if request.method == 'POST':
+        user = request.user
+        user.email = request.POST.get('email', user.email)
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.save()
+        messages.success(request, 'User information added successfully!')
+        return redirect('dashboard')
+    
+    return render(request, 'inventory/add_user_info.html')

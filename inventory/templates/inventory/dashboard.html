@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     {% load static %}
+    {% load humanize %}  <!-- Load humanize for intcomma filter -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Dashboard</title>
@@ -28,12 +29,6 @@
                 <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="{% url 'inventory_items' %}">
                     <i class="fas fa-boxes mr-2"></i> Inventory Items
                 </a>
-                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="#">
-                    <i class="fas fa-plus-circle mr-2"></i> Add Item
-                </a>
-                <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="#">
-                    <i class="fas fa-chart-bar mr-2"></i> Reports
-                </a>
                 <a class="block py-2 px-4 text-sm hover:bg-indigo-600 transition duration-200" href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                 </a>
@@ -42,17 +37,40 @@
 
         <!-- Main Content -->
         <main class="flex-1 p-8">
-            <!-- Define the block where child templates will inject content -->
             {% block content %}
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h1 class="text-3xl font-semibold mb-6">Welcome, {{ user.username }}</h1>
+
+                <!-- User Information and KPIs Section Side by Side -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- User Information -->
                     <div class="bg-blue-100 p-4 rounded-lg">
                         <h2 class="text-xl font-semibold mb-2">User Information</h2>
                         <p class="mb-2"><i class="fas fa-envelope mr-2"></i>Email: {{ user.email }}</p>
                         <p class="mb-2"><i class="fas fa-user mr-2"></i>First Name: {{ user.first_name }}</p>
                         <p><i class="fas fa-user mr-2"></i>Last Name: {{ user.last_name }}</p>
                     </div>
+
+                    <!-- KPIs Section -->
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <h2 class="text-xl font-semibold mb-2">Key Performance Indicators (KPIs)</h2>
+                        <p class="mb-2"><i class="fas fa-money-bill mr-2"></i>Total Inventory Value: ₱{{ total_inventory_value|intcomma }}</p>  <!-- Format with commas -->
+                        <p class="mb-2"><i class="fas fa-box mr-2"></i>Total Items in Stock: {{ total_items_in_stock }}</p>
+                        <p class="mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Low Stock Items: {{ low_stock_count }}</p>
+                    </div>
+                </div>
+
+                <!-- Add and Edit User Information Buttons -->
+                <div class="mt-4">
+                    {% if not user.email or not user.first_name or not user.last_name %}
+                        <a href="{% url 'add_user_info' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            Add User Information
+                        </a>
+                    {% else %}
+                        <a href="{% url 'edit_user_info' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2">
+                            Edit User Information
+                        </a>
+                    {% endif %}
                 </div>
             </div>
             {% endblock %}
