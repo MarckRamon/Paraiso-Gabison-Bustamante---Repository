@@ -9,10 +9,15 @@
         <div class="content-header">
             <h1>Inventory</h1>
             <div class="search-add">
-                <input type="text" placeholder="Search">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by item name" oninput="searchItems()">
+                    <i class="fas fa-search search-icon" onclick="triggerSearch()"></i>
+                    <i class="fas fa-filter filter-icon" onclick="toggleFilterOptions()"></i>
+                </div>
                 <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
             </div>
         </div>
+        
         <table class="inventory-table">
             <thead>
                 <tr>
@@ -93,6 +98,60 @@
 </div>
 
 <style>
+     /* Container for search and add button */
+.search-add {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+#searchInput {
+    padding-right: 60px; /* Make room for icons */
+    width: 200px;
+    height: 36px;
+    border: 1px solid #ccc;
+    border-radius: 18px;
+    padding-left: 15px;
+    font-size: 14px;
+}
+
+.search-icon,
+.filter-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.search-icon {
+    right: 30px;
+}
+
+.filter-icon {
+    right: 10px;
+}
+
+.add-product {
+    background-color: #4CAF50; /* Add New Product button color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-product:hover {
+    background-color: #45a049; /* Darker shade on hover */
+}
+
     .modal {
         display: none;
         position: fixed;
@@ -153,6 +212,41 @@
 </style>
 
 <script>
+    function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+    const searchItems = debounce(() => {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const url = new URL(window.location);
+        url.searchParams.set('search', searchTerm);
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTableBody = doc.getElementById('inventoryTableBody');
+                document.getElementById('inventoryTableBody').innerHTML = newTableBody.innerHTML;
+            })
+            .catch(error => console.error('Error:', error));
+    }, 300);
+
+    function triggerSearch() {
+        searchItems();
+    }
+
+document.getElementById('searchInput').addEventListener('input', searchItems);
+document.querySelector('.search-icon').addEventListener('click', triggerSearch);
+
     function openAddProductModal() {
         document.getElementById('addProductModal').style.display = 'block';
     }

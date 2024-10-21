@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db.models import Q
 from .models import InventoryItem
 import json
 
@@ -24,9 +25,15 @@ def dashboard(request):
     })
 
 def inventory_items(request):
+    search_query = request.GET.get('search', '')
     inventory_items = InventoryItem.objects.all()
+
+    if search_query:
+        inventory_items = inventory_items.filter(name__icontains=search_query)
+
     return render(request, 'inventory/inventory_items.html', {
         'inventory_items': inventory_items,
+        'search_query': search_query,
     })
 
 @login_required
