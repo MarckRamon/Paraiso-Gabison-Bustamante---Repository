@@ -31,7 +31,7 @@ class Order(models.Model):
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Preparing')
-    created_at = models.DateTimeField(default=timezone.now)  # Correctly set default
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Order {self.id} - {self.item.name}"
