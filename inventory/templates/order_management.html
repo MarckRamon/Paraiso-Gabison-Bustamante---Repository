@@ -1,0 +1,314 @@
+{% extends 'inventory/dashboard.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
+
+<div class="container">
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Order Management</h1>
+            <div class="search-add">
+                <input type="text" id="searchInput" placeholder="Search Orders" onkeyup="searchOrders()">
+                <button class="add-product" onclick="openAddOrderModal()">Add New Order</button>
+                <div class="filter-container">
+                    <select id="statusFilter" onchange="filterOrders()" class="status-dropdown">
+                        <option value="">All Statuses</option>
+                        <option value="Preparing">Preparing</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>                
+            </div>
+        </div>
+        
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                {% for order in orders %}
+                <tr class="orderRow">
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.item.name }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>₱{{ order.price|floatformat:2 }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>
+                        {% if order.status == 'Preparing' %}
+                        <button class="delete" onclick="cancelOrder('{{ order.id }}')"><i class="fas fa-trash-alt"></i> Cancel</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="go-back" onclick="history.back()">Go Back</button>
+    </main>
+
+    <div id="addOrderModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeAddOrderModal()" class="close">&times;</span>
+            <h2>Add New Order</h2>
+            <form id="addOrderForm" onsubmit="submitAddOrder(event)">
+                <label for="productName">Product Name:</label>
+                <input type="text" id="productName" name="productName" required><br><br>
+                
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required><br><br>
+                
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" required><br><br>
+                
+                <label for="supplier">Supplier:</label>
+                <select id="supplier" name="supplier" required>
+                    <option value="">Select Supplier</option>
+                    <option value="FurnitureCo">FurnitureCo</option>
+                    <option value="ApplianceWorld">Appliance World</option>
+                    <option value="BagsAndMore">Bags and More</option>
+                    <option value="HomeGoodsStore">Home Goods Store</option>
+                    <option value="LifestyleOutlet">Lifestyle Outlet</option>
+                </select><br><br>
+                
+                <button type="submit" class="add-product">Add Order</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,  0, 0, 0.6);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: auto;
+        padding: 20px;
+        border:  1px solid #ccc;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content h2 {
+        margin-top: 0;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .modal-content label {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .modal-content input,
+    .modal-content select {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .modal-content button {
+        margin-top: 15px;
+        background-color: #1890ff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .modal-content button:hover {
+        background-color: #007bff;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .filter-container {
+        position: relative;
+        display: inline-block;
+        margin-left: 10px;
+    }
+
+    .status-dropdown {
+        padding: 10px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        width: 150px;
+        height: 41px;
+        font-size: 16px;
+        color: #333;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .status-dropdown:hover {
+        background-color: #f9f9f9;
+    }
+
+    .status-dropdown option {
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        color: #333;
+        background-color: #fff;
+    }
+
+    .status-dropdown option:hover {
+        background-color: #f9f9f9;
+    }
+</style>
+
+<script>
+    function openAddOrderModal() {
+        document.getElementById('addOrderModal').style.display = 'block';
+    }
+
+    function closeAddOrderModal() {
+        document.getElementById('addOrderModal').style.display = 'none';
+    }
+
+    function cancelOrder(orderId) {
+        fetch(`/orders/cancel/${orderId}/`, {
+            method: 'POST',
+            headers: { 
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to cancel order');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error canceling order');
+        });
+    }
+
+    function submitAddOrder(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append('productName', document.getElementById('productName').value);
+        formData.append('quantity', document.getElementById('quantity').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('supplier', document.getElementById('supplier').value);
+
+        fetch('/orders/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken ')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to add order');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error adding order');
+        });
+
+        closeAddOrderModal();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function searchOrders() {
+        const searchInput = document.getElementById('searchInput').value.toUpperCase();
+        const orderRows = document.getElementById('orderTableBody').getElementsByTagName('tr');
+
+        for (let i = 0; i < orderRows.length; i++) {
+            const orderRow = orderRows[i];
+            const orderId = orderRow.cells[0].textContent;
+            const itemName = orderRow.cells[1].textContent;
+            const quantity = orderRow.cells[2].textContent;
+            const price = orderRow.cells[3].textContent;
+            const status = orderRow.cells[4].textContent;
+
+            if (orderId.toUpperCase().includes(searchInput) || itemName.toUpperCase().includes(searchInput) || quantity.toUpperCase().includes(searchInput) || price.toUpperCase().includes(searchInput) || status.toUpperCase().includes(searchInput)) {
+                orderRow.style.display = '';
+            } else {
+                orderRow.style.display = 'none';
+            }
+        }
+    }
+
+    function filterOrders() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const orderRows = document.getElementById('orderTableBody').getElementsByTagName('tr');
+
+        for (let i = 0; i < orderRows.length; i++) {
+            const orderRow = orderRows[i];
+            const status = orderRow.cells[4].textContent;
+
+            if (statusFilter === '' || status === statusFilter) {
+                orderRow.style.display = '';
+            } else {
+                orderRow.style.display = 'none';
+            }
+        }
+    }
+</script>
+{% endblock %}

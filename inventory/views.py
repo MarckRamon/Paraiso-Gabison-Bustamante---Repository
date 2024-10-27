@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import InventoryItem
+from .models import InventoryItem, Order, Item
+from decimal import Decimal
 import json
 
 @login_required
@@ -147,3 +148,109 @@ def add_user_info(request):
         return redirect('dashboard')
     
     return render(request, 'inventory/add_user_info.html')
+
+def order_management(request):
+    orders = Order.objects.all()
+    inventory_items = Item.objects.all()
+    return render(request, 'order_management.html', {'orders': orders, 'inventory_items': inventory_items})
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_order(request):
+    try:
+        # Get data from POST request
+        product_name = request.POST.get('productName')
+        quantity = request.POST.get('quantity')
+        price = Decimal(request.POST.get('price'))
+        supplier = request.POST.get('supplier')
+
+        # Validate required fields
+        if not all([product_name, quantity, price, supplier]):
+            return JsonResponse({
+                'success': False,
+                'error': 'Missing required fields'
+            }, status=400)
+
+        # Convert and validate quantity and price
+        try:
+            quantity = int(quantity)
+            price = Decimal(price)
+            if quantity <= 0 or price <= 0:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Quantity and price must be positive numbers'
+                }, status=400)
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid quantity or price format'
+            }, status=400)
+
+        # Get or create the item
+        try:
+            item = Item.objects.get(name=product_name)
+        except Item.DoesNotExist:
+            # You might want to adjust this based on your Item model fields
+            item = Item.objects.create(
+                name=product_name,
+                supplier=supplier
+            )
+
+        # Create the order
+        order = Order.objects.create(
+            item=item,
+            quantity=quantity,
+            price=price,
+            status='Preparing'
+        )
+
+        return JsonResponse({
+            'success': True,
+            'orderId': order.id,
+            'message': 'Order created successfully'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def cancel_order(request, order_id):
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        
+        if order.status != 'Preparing':
+            return JsonResponse({
+                'success': False,
+                'error': 'Cannot cancel order in current status'
+            }, status=400)
+
+        order.status = 'Cancelled'
+        order.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Order cancelled successfully'
+        })
+
+    except Order.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Order not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+def order_management(request):
+    orders = Order.objects.all().select_related('item')
+    return render(request, 'order_management.html', {
+        'orders': orders
+    })
