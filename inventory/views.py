@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import InventoryItem
 import json
+import openpyxl
 
 @login_required
 def dashboard(request):
@@ -147,3 +148,30 @@ def add_user_info(request):
         return redirect('dashboard')
     
     return render(request, 'inventory/add_user_info.html')
+
+@login_required
+def export_inventory(request):
+    # Create a new workbook and select the active worksheet
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Inventory Items'
+
+    # Define the headers
+    headers = ['ID', 'Name', 'Category', 'Quantity', 'Price', 'Expiry Days']
+    worksheet.append(headers)
+
+    # Fetch the inventory items from the database
+    inventory_items = InventoryItem.objects.all().values_list('id', 'name', 'category', 'quantity', 'price', 'expiry_days')
+
+    # Add the data to the worksheet
+    for item in inventory_items:
+        worksheet.append(item)
+
+    # Create an HTTP response with the appropriate Excel file type
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=inventory_items.xlsx'  # Set the filename for download
+
+    # Save the workbook to the response
+    workbook.save(response)  # Save the workbook directly to the response
+
+    return response
