@@ -15,7 +15,7 @@ def dashboard(request):
     # Calculate KPIs
     total_inventory_value = sum(item.quantity * item.price for item in InventoryItem.objects.all())
     total_items_in_stock = sum(item.quantity for item in InventoryItem.objects.all())
-    low_stock_count = sum(1 for item in InventoryItem.objects.all() if item.quantity < 10)  #  threshold for low stock
+    low_stock_count = sum(1 for item in InventoryItem.objects.all() if item.quantity < 10)  # Example threshold for low stock
 
     return render(request, 'inventory/dashboard.html', {
         'user': user,
@@ -50,32 +50,36 @@ def inventory_items(request):
 
 @login_required
 @csrf_exempt
+@require_http_methods(["POST"])
 def add_product(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            # Create new product instance
-            product = InventoryItem.objects.create(
-                name=data['name'],
-                category=data['category'],
-                quantity=data['quantity'],
-                price=data['price']
-            )
-            
-            # Return the created product data
-            return JsonResponse({
-                'id': product.id,
-                'name': product.name,
-                'category': product.category,
-                'quantity': product.quantity,
-                'price': str(product.price),
-                'message': 'Item updated successfully'
-            })
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    try:
+        data = json.loads(request.body)
+        name = data.get('name')
+        category = data.get('category')
+        quantity = int(data.get('quantity'))
+        price = float(data.get('price'))
+       
 
+        new_product = InventoryItem(
+            name=name,
+            category=category,
+            quantity=quantity,
+            price=price,
+           
+        )
+        new_product.save()
 
+        return JsonResponse({
+            'id': new_product.id,
+            'name': new_product.name,
+            'category': new_product.category,
+            'quantity': new_product.quantity,
+            'price': new_product.price,
+           
+            'message': 'Product added successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 @login_required
 @csrf_exempt
@@ -116,6 +120,7 @@ def edit_item(request, item_id):
             'category': item.category,
             'quantity': item.quantity,
             'price': float(item.price),
+            
             'message': 'Item updated successfully'
         })
     except InventoryItem.DoesNotExist:
@@ -125,7 +130,7 @@ def edit_item(request, item_id):
 
 @login_required
 @csrf_exempt
-@require_http_methods(["DELETE"])  
+@require_http_methods(["DELETE"])  # Change to DELETE method
 def delete_item(request, item_id):
     try:
         item = InventoryItem.objects.get(id=item_id)
