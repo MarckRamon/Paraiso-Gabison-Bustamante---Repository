@@ -9,7 +9,6 @@ from .models import InventoryItem, Order, Item
 from decimal import Decimal
 import json
 import openpyxl
-from io import BytesIO
 
 @login_required
 def dashboard(request):
