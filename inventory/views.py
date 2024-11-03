@@ -25,9 +25,24 @@ def dashboard(request):
     })
 
 def inventory_items(request):
+    search_query = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+
     inventory_items = InventoryItem.objects.all()
+
+    if search_query:
+        inventory_items = inventory_items.filter(name__icontains=search_query)
+
+    if category_filter:
+        inventory_items = inventory_items.filter(category=category_filter)
+
+    categories = InventoryItem.objects.values_list('category', flat=True).distinct()
+
     return render(request, 'inventory/inventory_items.html', {
         'inventory_items': inventory_items,
+        'search_query': search_query,
+        'categories': categories,
+        'selected_category': category_filter
     })
 
 @login_required
@@ -40,14 +55,12 @@ def add_product(request):
         category = data.get('category')
         quantity = int(data.get('quantity'))
         price = float(data.get('price'))
-        expiry_days = int(data.get('expiry_days'))
 
         new_product = InventoryItem(
             name=name,
             category=category,
             quantity=quantity,
-            price=price,
-            expiry_days=expiry_days
+            price=price
         )
         new_product.save()
 
@@ -57,7 +70,6 @@ def add_product(request):
             'category': new_product.category,
             'quantity': new_product.quantity,
             'price': new_product.price,
-            'expiry_days': new_product.expiry_days,
             'message': 'Product added successfully'
         })
     except Exception as e:
@@ -75,7 +87,6 @@ def get_item(request, item_id):
             'category': item.category,
             'quantity': item.quantity,
             'price': float(item.price),
-            'expiry_days': item.expiry_days,
         })
     except InventoryItem.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
@@ -87,13 +98,12 @@ def edit_item(request, item_id):
     try:
         item = InventoryItem.objects.get(id=item_id)
         data = json.loads(request.body)
-        
+
         item.name = data.get('name', item.name)
         item.category = data.get('category', item.category)
         item.quantity = int(data.get('quantity', item.quantity))
         item.price = float(data.get('price', item.price))
-        item.expiry_days = int(data.get('expiry_days', item.expiry_days))
-        
+
         item.save()
 
         return JsonResponse({
@@ -102,7 +112,6 @@ def edit_item(request, item_id):
             'category': item.category,
             'quantity': item.quantity,
             'price': float(item.price),
-            'expiry_days': item.expiry_days,
             'message': 'Item updated successfully'
         })
     except InventoryItem.DoesNotExist:
@@ -112,7 +121,7 @@ def edit_item(request, item_id):
 
 @login_required
 @csrf_exempt
-@require_http_methods(["DELETE"])  # Change to DELETE method
+@require_http_methods(["DELETE"])
 def delete_item(request, item_id):
     try:
         item = InventoryItem.objects.get(id=item_id)
@@ -133,7 +142,7 @@ def edit_user_info(request):
         user.save()
         messages.success(request, 'User information updated successfully!')
         return redirect('dashboard')
-    
+
     return render(request, 'inventory/edit_user_info.html', {'user': user})
 
 @login_required
@@ -146,7 +155,7 @@ def add_user_info(request):
         user.save()
         messages.success(request, 'User information added successfully!')
         return redirect('dashboard')
-    
+
     return render(request, 'inventory/add_user_info.html')
 
 def order_management(request):
@@ -159,20 +168,17 @@ def order_management(request):
 @require_http_methods(["POST"])
 def add_order(request):
     try:
-        # Get data from POST request
         product_name = request.POST.get('productName')
         quantity = request.POST.get('quantity')
         price = Decimal(request.POST.get('price'))
         supplier = request.POST.get('supplier')
 
-        # Validate required fields
         if not all([product_name, quantity, price, supplier]):
             return JsonResponse({
                 'success': False,
                 'error': 'Missing required fields'
             }, status=400)
 
-        # Convert and validate quantity and price
         try:
             quantity = int(quantity)
             price = Decimal(price)
@@ -187,17 +193,14 @@ def add_order(request):
                 'error': 'Invalid quantity or price format'
             }, status=400)
 
-        # Get or create the item
         try:
             item = Item.objects.get(name=product_name)
         except Item.DoesNotExist:
-            # You might want to adjust this based on your Item model fields
             item = Item.objects.create(
                 name=product_name,
                 supplier=supplier
             )
 
-        # Create the order
         order = Order.objects.create(
             item=item,
             quantity=quantity,
@@ -223,7 +226,7 @@ def add_order(request):
 def cancel_order(request, order_id):
     try:
         order = get_object_or_404(Order, id=order_id)
-        
+
         if order.status != 'Preparing':
             return JsonResponse({
                 'success': False,
