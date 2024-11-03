@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.models import User
@@ -8,6 +8,8 @@ from django.contrib import messages
 from .models import InventoryItem, Order, Item
 from decimal import Decimal
 import json
+import openpyxl
+from io import BytesIO
 
 @login_required
 def dashboard(request):
@@ -30,12 +32,15 @@ def inventory_items(request):
 
     inventory_items = InventoryItem.objects.all()
 
+    
     if search_query:
         inventory_items = inventory_items.filter(name__icontains=search_query)
 
+    
     if category_filter:
         inventory_items = inventory_items.filter(category=category_filter)
 
+   
     categories = InventoryItem.objects.values_list('category', flat=True).distinct()
 
     return render(request, 'inventory/inventory_items.html', {
@@ -257,3 +262,24 @@ def order_management(request):
     return render(request, 'order_management.html', {
         'orders': orders
     })
+
+@login_required
+def export_inventory(request):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Inventory Items'
+
+    headers = ['ID', 'Name', 'Category', 'Quantity', 'Price']
+    worksheet.append(headers)
+
+    inventory_items = InventoryItem.objects.all().values_list('id', 'name', 'category', 'quantity', 'price')
+
+    for item in inventory_items:
+        worksheet.append(item)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=inventory_items.xlsx'
+
+    workbook.save(response)
+
+    return response

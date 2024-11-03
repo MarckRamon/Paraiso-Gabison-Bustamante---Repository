@@ -21,6 +21,7 @@
                     </select>
                 </div>
                 <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
+                <button class="export ml-2" onclick="exportInventory()">Export</button>
             </div>
         </div>
         <table class="inventory-table">
@@ -196,6 +197,20 @@
 .add-product:hover {
     background-color: #45a049; 
 }
+
+.export {
+        background-color: #008CBA;
+        color: white; 
+        padding: 10px 20px;
+        border: none; 
+        border-radius: 5px; 
+        cursor: pointer;
+        font-size: 16px; 
+    }
+
+.export:hover {
+        background-color: #007B9A; 
+    }
 </style>
 
 <script>
@@ -214,6 +229,10 @@ function openAddProductModal() {
 function closeAddProductModal() {
     document.getElementById('addProductModal').style.display = 'none';
 }
+
+function exportInventory() {
+        window.location.href = "{% url 'export_inventory' %}";
+    }
 
 const addProductUrl = "{% url 'add_product' %}";
 
@@ -269,7 +288,7 @@ function editItem(itemId) {
     fetch(`/inventory/get-item/${itemId}/`)
         .then(response => response.json())
         .then(data => {
-            document.getElementById('editItemId ').value = data.id;
+            document.getElementById('editItemId').value = data.id;
             document.getElementById('editName').value = data.name;
             document.getElementById('editCategory').value = data.category;
             document.getElementById('editQuantity').value = data.quantity;
