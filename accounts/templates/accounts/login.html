@@ -1,106 +1,304 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Inventory Management System</title>
-    {% load static %}
+    <title>Login - Inventory Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f4f7fa;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            object-fit: cover;
+            filter: brightness(0.7);
+        }
+
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 0;
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            color: white;
         }
-        .login-container {
-            background-color: #ffffff;
+
+        .login-box {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
             max-width: 400px;
+            animation: fadeIn 1s ease-out;
         }
-        h2 {
-            color: #333;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
             text-align: center;
             margin-bottom: 30px;
-            font-weight: 600;
+            font-size: 2em;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-        input[type="text"], input[type="password"] {
-            padding: 12px;
+
+        .form-group {
             margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
         }
-        button {
-            background-color: #4338ca;
-            color: white;
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+            font-size: 0.9em;
+        }
+
+        .form-group input {
+            width: 100%;
             padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #73c6ff, #3b82f6);
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1em;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #3730a3;
-        }
-        .error-message {
-            color: #e53e3e;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        .register-link {
-            text-align: center;
+            transition: all 0.3s ease;
             margin-top: 20px;
         }
-        .register-link a {
-            color: #4338ca;
-            text-decoration: none;
-            font-weight: 500;
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
-        .register-link a:hover {
-            text-decoration: underline;
+
+        .links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .links a {
+            color: #73c6ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #3b82f6;
+        }
+
+        .links a:hover::after {
+            width: 100%;
+        }
+
+        .audio-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-controls:hover {
+            transform: scale(1.1);
+        }
+
+        .video-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .video-controls:hover {
+            transform: scale(1.1);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
+    <video class="video-background" autoplay muted loop id="bgVideo">
+        <source src="{% static 'livebg.mp4' %}" type="video/mp4">
+    </video>
+    <div class="background-overlay"></div>
+    
     <div class="login-container">
-        <h2>Login</h2>
-        <form method="POST">
-            {% csrf_token %}
-            {% if form.non_field_errors %}
-                <div class="error-message">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-            {% for field in form %}
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                    <div class="error-message">{{ field.errors }}</div>
+        <div class="login-box">
+            <div class="logo">
+                Login
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        {{ form.non_field_errors }}
+                    </div>
                 {% endif %}
-            {% endfor %}
-            <button type="submit">Login</button>
-        </form>
-        <div class="register-link">
-            <p>No account yet? <a href="{% url 'register' %}">Register</a></p>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username">
+                    {% if form.username.errors %}
+                        <div class="error-message">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password">
+                    {% if form.password.errors %}
+                        <div class="error-message">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="login-button">Login</button>
+                
+                <div class="links">
+                    <a href="{% url 'register' %}">Register now</a>
+                    <a href="#">Forgot password?</a>
+                </div>
+            </form>
         </div>
     </div>
+
+    <div class="audio-controls" onclick="toggleMusic()" title="Toggle music">
+        🎵
+    </div>
+
+    <div class="video-controls" onclick="toggleVideo()" title="Toggle video">
+        🎬
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="{% static 'you.mp3' %}" type="audio/mp3">
+    </audio>
+
+    <script>
+        let isPlaying = false;
+        const audio = document.getElementById('bgMusic');
+        const video = document.getElementById('bgVideo');
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play();
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function toggleVideo() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            video.play().catch(function(error) {
+                console.log("Video autoplay failed:", error);
+            });
+        });
+
+        video.addEventListener('error', function(e) {
+            console.log("Video error:", e);
+            document.body.style.backgroundColor = '#1a1a1a';
+        });
+    </script>
 </body>
 </html>
