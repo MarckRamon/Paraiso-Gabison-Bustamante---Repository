@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,6 +72,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -210,12 +212,18 @@
         }
     </style>
 </head>
+
 <body>
     <video class="video-background" autoplay muted loop id="bgVideo">
         <source src="{% static 'livebg.mp4' %}" type="video/mp4">
     </video>
+
+    <audio id="bgMusic" autoplay preload="auto" loop>
+        <source src="{% static 'you.mp3' %}" type="audio/mp3">
+    </audio>
+
     <div class="background-overlay"></div>
-    
+
     <div class="login-container">
         <div class="login-box">
             <div class="logo">
@@ -224,31 +232,31 @@
             <form method="POST">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
-                    <div class="error-message">
-                        {{ form.non_field_errors }}
-                    </div>
+                <div class="error-message">
+                    {{ form.non_field_errors }}
+                </div>
                 {% endif %}
-                
+
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" placeholder="Enter your username">
                     {% if form.username.errors %}
-                        <div class="error-message">{{ form.username.errors }}</div>
+                    <div class="error-message">{{ form.username.errors }}</div>
                     {% endif %}
                 </div>
-                
+
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="Enter your password">
                     {% if form.password.errors %}
-                        <div class="error-message">{{ form.password.errors }}</div>
+                    <div class="error-message">{{ form.password.errors }}</div>
                     {% endif %}
                 </div>
 
-                <button type="submit" class="login-button">Login</button>
-                
+                <button type="submit" class="login-button" onclick="toggleMusic()">Login</button>
+
                 <div class="links">
-                    <a href="{% url 'register' %}">Register now</a>
+                    <a href="{% url 'register' %}" onclick="toggleMusic()">Register now</a>
                     <a href="#">Forgot password?</a>
                 </div>
             </form>
@@ -262,10 +270,6 @@
     <div class="video-controls" onclick="toggleVideo()" title="Toggle video">
         🎬
     </div>
-
-    <audio id="bgMusic" loop>
-        <source src="{% static 'you.mp3' %}" type="audio/mp3">
-    </audio>
 
     <script>
         let isPlaying = false;
@@ -289,16 +293,24 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            video.play().catch(function(error) {
-                console.log("Video autoplay failed:", error);
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+        const audio = document.getElementById('bgMusic');
+        audio.muted = true;
+        audio.play().then(() => {
+            audio.muted = false;
+        }).catch(error => {
+            console.log("Autoplay failed, will play on user interaction:", error);
+            document.addEventListener('click', () => {
+                audio.play();
+            }, { once: true });
         });
 
-        video.addEventListener('error', function(e) {
-            console.log("Video error:", e);
-            document.body.style.backgroundColor = '#1a1a1a';
+        const video = document.getElementById('bgVideo');
+        video.play().catch(function (error) {
+            console.log("Video autoplay failed:", error);
         });
+    });
     </script>
 </body>
+
 </html>
