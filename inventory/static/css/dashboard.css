@@ -1,118 +1,118 @@
 /* Enhanced Modern Inventory Dashboard CSS */
 
 :root {
-    --primary-color: #4338ca;
-    --primary-light: #6366f1;
-    --secondary-color: #10b981;
-    --text-color: #1f2937;
-    --bg-color: #f3f4f6;
-    --card-bg: #ffffff;
-  }
-  
-  body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color) !important;
-    color: var(--text-color) !important;
-    margin: 0;
-    padding: 0;
-  }
-  
+  --primary-color: #4338ca;
+  --primary-light: #6366f1;
+  --secondary-color: #10b981;
+  --text-color: #1f2937;
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+  color: white;
+  padding-top: 20px;
+}
+
+.sidebar h2 {
+  padding: 20px;
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.sidebar li {
+  padding: 10px 20px;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+}
+
+.sidebar a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 5px;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 30px;
+}
+
+h1 {
+  font-size: 28px;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.user-info {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.user-info h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+}
+
+.user-info p {
+  margin: 10px 0;
+}
+
+/* Icons */
+.sidebar a::before {
+  content: '\f015'; /* Default icon (home) */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+.sidebar a[href*="inventory"]::before { content: '\f1b3'; } /* Box icon */
+.sidebar a[href*="add"]::before { content: '\f067'; } /* Plus icon */
+.sidebar a[href*="reports"]::before { content: '\f080'; } /* Chart icon */
+.sidebar a[href*="logout"]::before { content: '\f2f5'; } /* Sign out icon */
+
+/* Responsive design */
+@media (max-width: 768px) {
   .container {
-    display: flex;
-    min-height: 100vh;
+    flex-direction: column;
   }
-  
   .sidebar {
-    width: 250px;
-    background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
-    color: white;
-    padding-top: 20px;
+    width: 100%;
+    order: -1;
   }
-  
-  .sidebar h2 {
-    padding: 20px;
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 20px 0;
-  }
-  
-  .sidebar li {
-    padding: 10px 20px;
-  }
-  
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    padding: 10px 0;
-    transition: all 0.3s ease;
-  }
-  
-  .sidebar a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding-left: 5px;
-  }
-  
   .main-content {
-    flex-grow: 1;
-    padding: 30px;
-  }
-  
-  h1 {
-    font-size: 28px;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
-  }
-  
-  .user-info {
-    background-color: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin-bottom: 20px;
   }
-  
-  .user-info h2 {
-    color: var(--primary-color);
-    margin-top: 0;
-  }
-  
-  .user-info p {
-    margin: 10px 0;
-  }
-  
-  /* Icons */
-  .sidebar a::before {
-    content: '\f015'; /* Default icon (home) */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 10px;
-  }
-  
-  .sidebar a[href*="inventory"]::before { content: '\f1b3'; } /* Box icon */
-  .sidebar a[href*="add"]::before { content: '\f067'; } /* Plus icon */
-  .sidebar a[href*="reports"]::before { content: '\f080'; } /* Chart icon */
-  .sidebar a[href*="logout"]::before { content: '\f2f5'; } /* Sign out icon */
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .container {
-      flex-direction: column;
-    }
-    .sidebar {
-      width: 100%;
-      order: -1;
-    }
-    .main-content {
-      padding: 20px;
-    }
-  }
+}
