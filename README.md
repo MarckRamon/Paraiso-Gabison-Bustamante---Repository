@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>📦 Inventory Management System 📦</h2>
+  <h1>📦 StockHub 📦</h2>
   <p>An Inventory Management System</p>
 </div>
 
