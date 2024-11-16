@@ -8,6 +8,27 @@
     <main class="main-content">
         <div class="content-header">
             <h1>Inventory</h1>
+            {% if low_stock_items %}
+            <div class="low-stock-alert">
+                <h3>Low Stock Alert</h3>
+                <p>The following items have stock below the threshold ({{ low_stock_threshold }}):</p>
+                <ul>
+                    {% for item in low_stock_items %}
+                    <li>
+                        <strong>{{ item.name }}</strong> (Category: {{ item.category }}) - 
+                        Quantity: <span style="color: red;">{{ item.quantity }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
             <div class="search-add">
                 <input type="text" id="searchInput" placeholder="Search item" oninput="searchItems()">
                 <div class="custom-dropdown">
@@ -37,7 +58,7 @@
             </thead>
             <tbody id="inventoryTableBody">
                 {% for item in inventory_items %}
-                <tr>
+                <tr {% if item.quantity < low_stock_threshold %} style="background-color: #ffe6e6;" {% endif %}>
                     <td>{{ item.id }}</td>
                     <td>{{ item.name }}</td>
                     <td>{{ item.category }}</td>
@@ -97,10 +118,35 @@
     
 
 <style>
+.low-stock-alert{
+    border: 1px solid red;
+    background-color: #ffe6e6;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+.low-stock-alert h3{
+    color:red;
+    margin-bottom: 10px;
+}
 .custom-dropdown {
     position: relative;
     display: inline-block;
     margin-right: 10px;
+}
+
+.messages{
+    margin-bottom: 20px;
+}
+.message{
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px 0;
+}
+.message.warning{
+    background-color: #ffcccb;
+    color: red;
+    border: 1px solid red;
 }
 
  .custom-dropdown select {

@@ -28,7 +28,7 @@ def dashboard(request):
 def inventory_items(request):
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
-
+    low_stock_threshold = 10
     inventory_items = InventoryItem.objects.all()
 
     
@@ -39,14 +39,21 @@ def inventory_items(request):
     if category_filter:
         inventory_items = inventory_items.filter(category=category_filter)
 
-   
+    low_stock_items = inventory_items.filter(quantity=low_stock_threshold)
+
+    if low_stock_items.exists():
+        messages.warning(request, f"There are {low_stock_items.count()} items with low stock.")
+
     categories = InventoryItem.objects.values_list('category', flat=True).distinct()
 
     return render(request, 'inventory/inventory_items.html', {
         'inventory_items': inventory_items,
         'search_query': search_query,
         'categories': categories,
-        'selected_category': category_filter
+        'selected_category': category_filter,
+        'low_stock_items': low_stock_items,
+        'low_stock_threshold': low_stock_threshold,
+
     })
 
 @login_required
