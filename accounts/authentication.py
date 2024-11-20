@@ -1,11 +1,13 @@
+from django.contrib.auth.hashers import check_password
 from .models import Admin
 
 class AdminAuthBackend:
     def authenticate(self, request, username=None, password=None):
         try:
             admin = Admin.objects.get(username=username)
-            if admin.password == password:
+            if check_password(password, admin.password):  # Use check_password to compare hashed passwords
                 return admin
+            return None
         except Admin.DoesNotExist:
             return None
 

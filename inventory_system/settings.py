@@ -131,9 +131,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'inventory_home'
+LOGIN_REDIRECT_URL = 'dashboard'
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.authentication.AdminAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
+
+AUTH_USER_MODEL = 'accounts.Admin'
 
