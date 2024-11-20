@@ -5,7 +5,7 @@ from .models import Admin
 class AdminRegistrationForm(UserCreationForm):
     class Meta:
         model = Admin
-        fields = ('firstname', 'lastname','username', 'email',  'password1', 'password2')
+        fields = ('first_name', 'last_name','username', 'email',  'password1', 'password2')
 
 class AdminLoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
