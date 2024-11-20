@@ -1,13 +1,13 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Inventory Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* General styles */
         * {
             margin: 0;
             padding: 0;
@@ -17,31 +17,26 @@
         body {
             font-family: 'Poppins', sans-serif;
             height: 100vh;
+            background-color: #000;
             overflow: hidden;
-            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .video-background {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -1;
-            object-fit: cover;
-            filter: brightness(0.7);
-        }
-
-        .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
             z-index: 0;
         }
 
@@ -49,268 +44,115 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 400px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
             color: white;
         }
 
-        .login-box {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 90%;
-            max-width: 400px;
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2em;
-            color: #ffffff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .form-group {
+        .login-header {
             margin-bottom: 20px;
         }
 
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
         .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ffffff;
             font-size: 0.9em;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin-top: 5px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1em;
-            transition: all 0.3s ease;
+            font-size: 0.9em;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.15);
         }
 
         .login-button {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(45deg, #73c6ff, #3b82f6);
+            padding: 10px;
+            background-color: #1d72b8;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             color: white;
-            font-size: 1em;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
+            font-size: 1em;
         }
 
         .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-        }
-
-        .links {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.9em;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px;
-        }
-
-        .links a {
-            color: #73c6ff;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: #3b82f6;
-            transition: width 0.3s ease;
-        }
-
-        .links a:hover {
-            color: #3b82f6;
-        }
-
-        .links a:hover::after {
-            width: 100%;
-        }
-
-        .audio-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .audio-controls:hover {
-            transform: scale(1.1);
-        }
-
-        .video-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 2;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .video-controls:hover {
-            transform: scale(1.1);
-        }
-
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            background-color: #145a86;
         }
 
         .error-message {
             color: #ff6b6b;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .links a {
+            color: #1d72b8;
+            text-decoration: none;
+            font-size: 0.8em;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-
 <body>
-    <video class="video-background" autoplay muted loop id="bgVideo">
-        <source src="{% static 'livebg.mp4' %}" type="video/mp4">
+    <video class="video-background" autoplay muted loop>
+        <source src="{% static 'win11.mp4' %}" type="video/mp4">
     </video>
-
-    <audio id="bgMusic" autoplay preload="auto" loop>
-        <source src="{% static 'you.mp3' %}" type="audio/mp3">
-    </audio>
-
-    <div class="background-overlay"></div>
-
+    <div class="overlay"></div>
     <div class="login-container">
-        <div class="login-box">
-            <div class="logo">
-                Login
-            </div>
-            <form method="POST">
-                {% csrf_token %}
-                {% if form.non_field_errors %}
-                <div class="error-message">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
-
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username">
-                    {% if form.username.errors %}
+        <h2 class="login-header">Welcome Back</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="error-message">{{ form.non_field_errors }}</div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username">
+                {% if form.username.errors %}
                     <div class="error-message">{{ form.username.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password">
-                    {% if form.password.errors %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password">
+                {% if form.password.errors %}
                     <div class="error-message">{{ form.password.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <button type="submit" class="login-button" onclick="toggleMusic()">Login</button>
-
-                <div class="links">
-                    <a href="{% url 'register' %}" onclick="toggleMusic()">Register now</a>
-                    <a href="#">Forgot password?</a>
-                </div>
-            </form>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="login-button">Login</button>
+        </form>
+        <div class="links">
+            <a href="{% url 'register' %}">Register</a>
+            <a href="#">Forgot Password?</a>
         </div>
     </div>
-
-    <div class="audio-controls" onclick="toggleMusic()" title="Toggle music">
-        🎵
-    </div>
-
-    <div class="video-controls" onclick="toggleVideo()" title="Toggle video">
-        🎬
-    </div>
-
-    <script>
-        let isPlaying = false;
-        const audio = document.getElementById('bgMusic');
-        const video = document.getElementById('bgVideo');
-
-        function toggleMusic() {
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                audio.play();
-            }
-            isPlaying = !isPlaying;
-        }
-
-        function toggleVideo() {
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-        const audio = document.getElementById('bgMusic');
-        audio.muted = true;
-        audio.play().then(() => {
-            audio.muted = false;
-        }).catch(error => {
-            console.log("Autoplay failed, will play on user interaction:", error);
-            document.addEventListener('click', () => {
-                audio.play();
-            }, { once: true });
-        });
-
-        const video = document.getElementById('bgVideo');
-        video.play().catch(function (error) {
-            console.log("Video autoplay failed:", error);
-        });
-    });
-    </script>
 </body>
-
 </html>

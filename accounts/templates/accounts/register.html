@@ -96,18 +96,44 @@
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
+            
+            <!-- First Name -->
+            <label for="{{ form.firstname.id_for_label }}">{{ form.firstname.label }}</label>
+            {{ form.firstname }}
+            {% if form.firstname.help_text %}
+                <p class="help-text">{{ form.firstname.help_text }}</p>
+            {% endif %}
+            {% if form.firstname.errors %}
+                <div class="error-message">{{ form.firstname.errors }}</div>
+            {% endif %}
+            
+            <!-- Last Name -->
+            <label for="{{ form.lastname.id_for_label }}">{{ form.lastname.label }}</label>
+            {{ form.lastname }}
+            {% if form.lastname.help_text %}
+                <p class="help-text">{{ form.lastname.help_text }}</p>
+            {% endif %}
+            {% if form.lastname.errors %}
+                <div class="error-message">{{ form.lastname.errors }}</div>
+            {% endif %}
+            
+            <!-- Other Fields -->
             {% for field in form %}
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <p class="help-text">{{ field.help_text }}</p>
-                {% endif %}
-                {% if field.errors %}
-                    <div class="error-message">{{ field.errors }}</div>
+                {% if field.name not in 'firstname lastname' %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="help-text">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-message">{{ field.errors }}</div>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
+            
             <button type="submit">Register</button>
         </form>
+        
         <div class="login-link">
             <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
         </div>
