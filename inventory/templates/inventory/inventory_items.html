@@ -1,5 +1,6 @@
 {% extends 'inventory/dashboard.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
@@ -63,7 +64,7 @@
                     <td>{{ item.name }}</td>
                     <td>{{ item.category }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>₱{{ item.price|floatformat:2 }}</td>
+                    <td>₱{{ item.price|floatformat:2|intcomma }}</td>
                     <td>
                         <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
                         <button class="delete" onclick="deleteItem('{{ item.id }}')"><i class="fas fa-trash"></i></button>

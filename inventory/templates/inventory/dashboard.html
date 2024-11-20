@@ -42,7 +42,7 @@
     <main class="flex-1 p-8 overflow-auto">
         {% block content %}
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h1 class="text-3xl font-semibold mb-6">Welcome, {{ user.username }}</h1>
+            <h1 class="text-3xl font-semibold mb-6">Welcome to StockHub, {{ user.username }}</h1>
 
             <!-- User Information and KPIs Section Side by Side -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -73,7 +73,7 @@
                 <!-- Key Performance Indicators (KPIs) -->
                 <div class="bg-green-50 border border-green-200 p-6 rounded-lg shadow-md">
                     <h2 class="text-xl font-semibold text-green-800 mb-4 flex items-center">
-                        <i class="fas fa-chart-line mr-2"></i> Key Performance Indicators (KPIs)
+                        <i class="fas fa-chart-line mr-2"></i> Inventory Dashboard
                     </h2>
                     <div class="space-y-3">
                         <p class="flex items-center text-gray-700">

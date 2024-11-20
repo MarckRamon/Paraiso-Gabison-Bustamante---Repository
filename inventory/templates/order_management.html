@@ -1,6 +1,8 @@
 {% extends 'inventory/dashboard.html' %}
 {% load static %}
 {% block content %}
+{% load humanize %}
+
 <link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
 
 <div class="container">
@@ -38,7 +40,7 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.item.name }}</td>
                     <td>{{ order.quantity }}</td>
-                    <td>₱{{ order.price|floatformat:2 }}</td>
+                    <td>₱{{ order.price|floatformat:2|intcomma }}</td>
                     <td>{{ order.status }}</td>
                     <td>
                         {% if order.status == 'Preparing' %}
