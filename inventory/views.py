@@ -184,7 +184,7 @@ def add_order(request):
         price = Decimal(request.POST.get('price'))
         supplier = request.POST.get('supplier')
 
-        if not all([product_name, quantity, price, supplier]):
+        if not all([product_name, quantity, price]):
             return JsonResponse({
                 'success': False,
                 'error': 'Missing required fields'
@@ -204,16 +204,18 @@ def add_order(request):
                 'error': 'Invalid quantity or price format'
             }, status=400)
 
+        # Ensure you are working with InventoryItem instead of Item
         try:
-            item = Item.objects.get(name=product_name)
-        except Item.DoesNotExist:
-            item = Item.objects.create(
-                name=product_name,
-                supplier=supplier
-            )
+            inventory_item = InventoryItem.objects.get(name=product_name)
+        except InventoryItem.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Inventory item not found. Please add it first.'
+            }, status=404)
 
+        # Create the order
         order = Order.objects.create(
-            item=item,
+            inventory_item=inventory_item,
             quantity=quantity,
             price=price,
             status='Preparing'
@@ -230,6 +232,8 @@ def add_order(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
 
 @login_required
 @csrf_exempt
@@ -262,12 +266,36 @@ def cancel_order(request, order_id):
             'success': False,
             'error': str(e)
         }, status=500)
+    
+def delete_order(request, order_id):
+    if request.method == 'DELETE':
+        order = get_object_or_404(Order, id=order_id)
+        if order.status == 'Cancelled':
+            order.delete()
+            return JsonResponse({'success': True, 'message': 'Order deleted successfully.'})
+        else:
+            return JsonResponse({'success': False, 'error': 'Only cancelled orders can be deleted.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def order_management(request):
-    orders = Order.objects.all().select_related('item')
+    orders = Order.objects.all().select_related('inventory_item')
     return render(request, 'order_management.html', {
         'orders': orders
     })
+def mark_order_as_arrived(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(Order, id=order_id)
+        if order.status != 'Arrived':
+            inventory_item = order.inventory_item
+            inventory_item.quantity += order.quantity
+            inventory_item.save()
+
+            order.status = 'Arrived'
+            order.save()
+
+            return JsonResponse({'success': True, 'message': 'Order marked as arrived and inventory updated.'})
+        return JsonResponse({'success': False, 'message': 'Order is already marked as arrived.'})
+        
 
 @login_required
 def export_inventory(request):

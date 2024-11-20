@@ -6,29 +6,40 @@
 
 <div class="container">
     <main class="main-content">
+        <div class="notification-wrapper">
+            <div class="notification-icon" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                {% if low_stock_items %}
+                <span class="notification-badge">{{ low_stock_items|length }}</span>
+                {% endif %}
+            </div>
+            
+            <div id="notificationPanel" class="notification-panel">
+                <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <button onclick="toggleNotifications()" class="close-notifications">&times;</button>
+                </div>
+                <div class="notification-content">
+                    {% if low_stock_items %}
+                        {% for item in low_stock_items %}
+                        <div class="notification-item">
+                            <div class="notification-title">
+                                <span>Low Stock Alert</span>
+                                <small>{{ item.updated_at|date:"M d, Y" }}</small>
+                            </div>
+                            <p>{{ item.name }} ({{ item.category }}) has reached the minimum threshold. Current quantity: {{ item.quantity }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-notifications">No new notifications</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
         <div class="content-header">
             <h1>Inventory</h1>
-            {% if low_stock_items %}
-            <div class="low-stock-alert">
-                <h3>Low Stock Alert</h3>
-                <p>The following items have stock below the threshold ({{ low_stock_threshold }}):</p>
-                <ul>
-                    {% for item in low_stock_items %}
-                    <li>
-                        <strong>{{ item.name }}</strong> (Category: {{ item.category }}) - 
-                        Quantity: <span style="color: red;">{{ item.quantity }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            
             <div class="search-add">
                 <input type="text" id="searchInput" placeholder="Search item" oninput="searchItems()">
                 <div class="custom-dropdown">
@@ -118,6 +129,134 @@
     
 
 <style>
+    .notification-wrapper {
+    position: absolute;
+    top: 2px;
+    right: 15px;
+    z-index: 1000;
+}
+
+.notification-icon {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.notification-icon i {
+    font-size: 32px;
+    color: #666;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ff4444;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    min-width: 12px;
+    text-align: center;
+}
+
+.notification-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.close-notifications {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+}
+
+.notification-content {
+    padding: 0;
+}
+
+.notification-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.notification-title span {
+    color: #ff4444;
+    font-weight: 600;
+}
+
+.notification-title small {
+    color: #888;
+}
+
+.notification-item p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.no-notifications {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+/* Scrollbar styling */
+.notification-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-panel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.notification-panel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 .low-stock-alert{
     border: 1px solid red;
     background-color: #ffe6e6;
@@ -507,5 +646,24 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+function toggleNotifications() {
+    const panel = document.getElementById('notificationPanel');
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+    } else {
+        panel.style.display = 'block';
+    }
+}
+
+// Close notifications panel when clicking outside
+document.addEventListener('click', function(event) {
+    const panel = document.getElementById('notificationPanel');
+    const icon = document.querySelector('.notification-icon');
+    if (panel.style.display === 'block' && 
+        !panel.contains(event.target) && 
+        !icon.contains(event.target)) {
+        panel.style.display = 'none';
+    }
+});
 </script>
 {% endblock %}
