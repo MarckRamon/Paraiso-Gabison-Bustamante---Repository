@@ -5,535 +5,519 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/inventory_items.css' %}">
 
-<div class="container">
-    <main class="main-content">
-        <div class="notification-wrapper">
-            <div class="notification-icon" onclick="toggleNotifications()">
-                <i class="fas fa-bell"></i>
-                {% if low_stock_items %}
-                <span class="notification-badge">{{ low_stock_items|length }}</span>
-                {% endif %}
-            </div>
-            
-            <div id="notificationPanel" class="notification-panel">
-                <div class="notification-header">
-                    <h3>Notifications</h3>
-                    <button onclick="toggleNotifications()" class="close-notifications">&times;</button>
-                </div>
-                <div class="notification-content">
-                    {% if low_stock_items %}
-                        {% for item in low_stock_items %}
-                        <div class="notification-item">
-                            <div class="notification-title">
-                                <span>Low Stock Alert</span>
-                                <small>{{ item.updated_at|date:"M d, Y" }}</small>
-                            </div>
-                            <p>{{ item.name }} ({{ item.category }}) has reached the minimum threshold. Current quantity: {{ item.quantity }}</p>
+<div class="flex flex-col min-h-screen bg-gray-50">
+    <div class="flex-1 py-8">
+        <!-- Remove max-w-7xl and adjust padding -->
+        <div class="w-full px-6">
+            <!-- Header Section -->
+            <div class="mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                    <h1 class="text-3xl font-bold text-gray-800">Inventory</h1>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex space-x-4">
+                            <input
+                                type="text"
+                                id="searchInput"
+                                placeholder="Search item"
+                                oninput="searchItems()"
+                                class="w-64 pl-4 pr-4 py-2 bg-white rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
+                            >
+                            <select
+                                id="categoryFilter"
+                                onchange="filterByCategory()"
+                                class="w-48 bg-white rounded-full border border-gray-200 px-4 py-2"
+                            >
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="no-notifications">No new notifications</p>
-                    {% endif %}
+                        <div class="flex space-x-4">
+                            <button
+                                onclick="openAddProductModal()"
+                                class="px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                            >
+                                Add Product
+                            </button>
+                            <button
+                                onclick="openAddCategoryModal()"
+                                class="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                            >
+                                Add Category
+                            </button>
+                            <button
+                                onclick="exportInventory()"
+                                class="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+                            >
+                                Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Quantity</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Price</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="bg-white divide-y divide-gray-200">
+                            {% for item in inventory_items %}
+                            <tr class="{% if item.quantity < low_stock_threshold %}bg-red-50{% endif %} hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.category.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.quantity }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₱{{ item.price|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-3">
+                                        <button onclick="editItem('{{ item.id }}')" class="text-blue-500 hover:text-blue-700">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteItem('{{ item.id }}')" class="text-red-500 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No inventory items found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="content-header">
-            <h1>Inventory</h1>
-            
-            <div class="search-add">
-                <input type="text" id="searchInput" placeholder="Search item" oninput="searchItems()">
-                <div class="custom-dropdown">
-                    <select id="categoryFilter" onchange="filterByCategory()">
-                        <option value="">All Categories</option>
+<!-- Add Product Modal -->
+<div id="addProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Product</h3>
+            <form id="addProductForm" class="mt-4">
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                    <select id="category" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category == selected_category %}selected{% endif %}>
-                                {{ category.name }}
-                            </option>
+                            <option value="{{ category.id }}">{{ category.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
-                <button class="add-category" onclick="openAddCategoryModal()">Add New Category</button>
-                <button class="export ml-2" onclick="exportInventory()">Export</button>
-            </div>
-        </div>
-        <table class="inventory-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Item Name</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="inventoryTableBody">
-                {% for item in inventory_items %}
-                <tr {% if item.quantity < low_stock_threshold %} style="background-color: #ffe6e6;" {% endif %}>
-                    <td>{{ item.id }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>₱{{ item.price|floatformat:2|intcomma }}</td>
-                    <td>
-                        <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
-                        <button class="delete" onclick="deleteItem('{{ item.id }}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>   
-                {% empty %}
-                <tr>
-                    <td colspan="7">No inventory items found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <button class="go-back" onclick="history.back()">Go Back</button>
-    </main>
-
-    <div id="addProductModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeAddProductModal()" class="close">&times;</span>
-            <h2>Add New Product</h2>
-            <form id="addProductForm" class="modal-form" onsubmit="submitAddProduct(event)">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required class="highlighted"><br><br>
-                <label for="category">Category:</label>
-                <select id="category" name="category" required class="highlighted">
-                    {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select><br><br>
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" required class="highlighted"><br><br>
-                <label for="price">Price:</label>
-                <input type="number" id="price" name="price" step="0.01" required class="highlighted"><br><br>
-                <button type="submit" class="add-product">Add Product</button>
+                <div class="mb-4">
+                    <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
+                    <input type="number" id="price" name="price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Product</button>
+                </div>
             </form>
         </div>
     </div>
+</div>
 
-    <div id="addCategoryModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeAddCategoryModal()" class="close">&times;</span>
-            <h2>Add New Category</h2>
-            <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}">
-                {% csrf_token %}
-                <label for="category_name">Category Name:</label>
-                <input type="text" id="category_name" name="category_name" required class="highlighted"><br><br>
-                <button type="submit" class="add-category">Add Category</button>
-            </form>
+    <!-- Notification System -->
+    <div class="notification-wrapper">
+        <div class="notification-icon" onclick="toggleNotifications()">
+            <i class="fas fa-bell"></i>
+            {% if low_stock_items %}
+            <span class="notification-badge">{{ low_stock_items|length }}</span>
+            {% endif %}
+        </div>
+        <div id="notificationPanel" class="notification-panel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button onclick="toggleNotifications()" class="close-notifications">&times;</button>
+            </div>
+            <div class="notification-content">
+                {% if low_stock_items %}
+                    {% for item in low_stock_items %}
+                    <div class="notification-item">
+                        <div class="notification-title">
+                            <span>Low Stock Alert</span>
+                            <small>{{ item.updated_at|date:"M d, Y" }}</small>
+                        </div>
+                        <p>{{ item.name }} ({{ item.category }}) has reached the minimum threshold. Current quantity: {{ item.quantity }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-notifications">No new notifications</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="addCategoryModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Category</h3>
+                <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="category_name" class="block text-sm font-medium text-gray-700">Category Name</label>
+                        <input type="text" id="category_name" name="category_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeAddCategoryModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Category</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
-    <div id="editProductModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeEditProductModal()" class="close">&times;</span>
-            <h2>Edit Product</h2>
-            <form id="editItemForm" method="POST" action="">
-                {% csrf_token %}
-                <input type="hidden" id="editItemId" name="item_id" value="">
-                <label for="editName">Name:</label>
-                <input type="text" id="editName" name="name" required>
-                
-                <label for="editCategory">Category:</label>
-                <select id="editCategory" name="category" required>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}">
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-                
-                <label for="editQuantity">Quantity:</label>
-                <input type="number" id="editQuantity" name="quantity" required>
-                
-                <label for="editPrice">Price:</label>
-                <input type="number" id="editPrice" name="price" step="0.01" required>
-                
-                <button type="submit">Update Item</button>
-            </form>
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Product</h3>
+                <form id="editItemForm" class="mt-4">
+                    {% csrf_token %}
+                    <input type="hidden" id="editItemId" name="item_id">
+                    <div class="mb-4">
+                        <label for="editName" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="editName" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editCategory" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="editCategory" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editQuantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                        <input type="number" id="editQuantity" name="quantity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editPrice" class="block text-sm font-medium text-gray-700">Price</label>
+                        <input type="number" id="editPrice" name="price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditProductModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Update Product</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+    
 
-<style>
-    .notification-wrapper {
-    position: absolute;
-    top: 2px;
-    right: 15px;
-    z-index: 1000;
-}
-
-.notification-icon {
-    width: 48px;
-    height: 48px;
-    position: relative;
-    cursor: pointer;
-    padding: 10px;
-}
-
-.notification-icon i {
-    font-size: 32px;
-    color: #666;
-}
-
-.notification-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #ff4444;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-    min-width: 12px;
-    text-align: center;
-}
-
-.notification-panel {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    width: 320px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.notification-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.notification-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.close-notifications {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #666;
-}
-
-.notification-content {
-    padding: 0;
-}
-
-.notification-item {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    background-color: #fff;
-    transition: background-color 0.2s;
-}
-
-.notification-item:hover {
-    background-color: #f8f9fa;
-}
-
-.notification-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.notification-title span {
-    color: #ff4444;
-    font-weight: 600;
-}
-
-.notification-title small {
-    color: #888;
-}
-
-.notification-item p {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-}
-
-.no-notifications {
-    padding: 20px;
-    text-align: center;
-    color: #888;
-}
-
-/* Scrollbar styling */
-.notification-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.notification-panel::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.notification-panel::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.notification-panel::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-.low-stock-alert{
-    border: 1px solid red;
-    background-color: #ffe6e6;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-}
-.low-stock-alert h3{
-    color:red;
-    margin-bottom: 10px;
-}
-.custom-dropdown {
-    position: relative;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.messages{
-    margin-bottom: 20px;
-}
-.message{
-    padding: 10px;
-    border-radius: 5px;
-    margin: 5px 0;
-}
-.message.warning{
-    background-color: #ffcccb;
-    color: red;
-    border: 1px solid red;
-}
-
- .custom-dropdown select {
-    appearance: none; 
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    background-color: #ffffff; 
-    border: 2px solid #4CAF50; 
-    border-radius: 5px; 
-    padding: 10px 20px; 
-    font-size: 16px; 
-    color: #333; 
-    cursor: pointer; 
-    outline: none; 
-    transition: border-color 0.3s; 
-}
-
-.custom-dropdown select:hover {
-    border-color: #45a049; 
-}
-
-.custom-dropdown select:focus {
-    border-color: #388e3c; 
-}
-
-.custom-dropdown::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #333; 
-    transform: translateY(-50%);
-    pointer-events: none; 
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-}
-
-
-.modal-form label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: inline-block;
-}
-
-.modal-form input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.modal-form button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-}
-
-.modal-form button:hover {
-    background-color: #45a049;
-}
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.highlighted {
-    border: 2px solid #4CAF50; 
-    padding: 10px;
-    border-radius: 5px;
-    width: calc(100% - 20px); 
-}
-
-.add-product {
-    background-color: #4CAF50; 
-    color: white; 
-    padding: 10px 20px; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    width: 100%; 
-    font-size: 16px; 
-}
-
-.add-product:hover {
-    background-color: #45a049; 
-}
-
-.export {
-        background-color: #008CBA;
-        color: white; 
-        padding: 10px 20px;
-        border: none; 
-        border-radius: 5px; 
-        cursor: pointer;
-        font-size: 16px; 
-    }
-
-.export:hover {
-        background-color: #007B9A; 
-    }
-    #editProductModal .modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 25px;
-    border: 1px solid #ddd;
-    width: 100%;
-    max-width: 500px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-#editProductModal .modal-content h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 10px;
-}
-
-#editProductModal form {
-    display: flex;
-    flex-direction: column;
-}
-
-#editProductModal label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-#editProductModal input,
-#editProductModal select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 2px solid #4CAF50;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 16px;
-    transition: border-color 0.3s;
-}
-
-#editProductModal input:focus,
-#editProductModal select:focus {
-    outline: none;
-    border-color: #388e3c;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
-}
-
-#editProductModal button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-#editProductModal button[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s;
-}
-
-.close:hover,
-.close:focus {
-    color: #333;
-    text-decoration: none;
-}
-</style>
+    <style>
+        /* Notification Wrapper */
+        .notification-wrapper {
+            position: absolute;
+            top: 2px;
+            right: 15px;
+            z-index: 1000;
+        }
+        
+        .notification-icon {
+            width: 48px;
+            height: 48px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-icon i {
+            font-size: 32px;
+            color: #666;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 12px;
+            text-align: center;
+        }
+        
+        .notification-panel {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Scrollbar Styling */
+        .notification-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .notification-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .notification-panel::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .notification-panel::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Notification Items */
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .notification-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .close-notifications {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .notification-content {
+            padding: 0;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+            transition: background-color 0.2s;
+        }
+        
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .notification-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .notification-title span {
+            color: #ff4444;
+            font-weight: 600;
+        }
+        
+        .notification-title small {
+            color: #888;
+        }
+        
+        .notification-item p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .no-notifications {
+            padding: 20px;
+            text-align: center;
+            color: #888;
+        }
+        
+        /* Low Stock Alert */
+        .low-stock-alert {
+            border: 1px solid red;
+            background-color: #ffe6e6;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .low-stock-alert h3 {
+            color: red;
+            margin-bottom: 10px;
+        }
+        
+        /* Custom Dropdown */
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .custom-dropdown select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: #ffffff;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .custom-dropdown select:hover {
+            border-color: #45a049;
+        }
+        
+        .custom-dropdown select:focus {
+            border-color: #388e3c;
+        }
+        
+        .custom-dropdown::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #333;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        /* Modal Form */
+        .modal-form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        
+        .modal-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .modal-form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .modal-form button:hover {
+            background-color: #45a049;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Inventory Container */
+        .inventory-container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .inventory-header,
+        .inventory-table {
+            width: 100%;
+        }
+        
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .inventory-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .inventory-table th,
+        .inventory-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .inventory-table th {
+            background-color: #f2f2f2;
+        }
+        </style>
+        
 
 <script>
 function debounce(func, delay) {
@@ -778,24 +762,37 @@ const searchItems = debounce(() => {
 document.getElementById('searchInput').addEventListener('input', searchItems);
 
 function filterByCategory() {
-    const category = document.getElementById('categoryFilter').value;
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const url = new URL(window.location);
+    const categorySelect = document.getElementById('categoryFilter');
+    const searchInput = document.getElementById('searchInput');
+    const category = categorySelect.value;
+    const search = searchInput.value.toLowerCase();
 
-    url.searchParams.set('category', category);
+    // Create URL with parameters
+    const url = new URL(window.location.href);
+    if (category) {
+        url.searchParams.set('category', category);
+    } else {
+        url.searchParams.delete('category');
+    }
     if (search) {
         url.searchParams.set('search', search);
     }
 
+    // Fetch filtered results
     fetch(url)
         .then(response => response.text())
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newTableBody = doc.getElementById('inventoryTableBody');
-            document.getElementById('inventoryTableBody').innerHTML = newTableBody.innerHTML;
+            if (newTableBody) {
+                document.getElementById('inventoryTableBody').innerHTML = newTableBody.innerHTML;
+            }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while filtering items.');
+        });
 }
 
 function getCookie(name) {
@@ -813,13 +810,9 @@ function getCookie(name) {
     return cookieValue;
 }
 function toggleNotifications() {
-    const panel = document.getElementById('notificationPanel');
-    if (panel.style.display === 'block') {
-        panel.style.display = 'none';
-    } else {
-        panel.style.display = 'block';
+        const panel = document.getElementById('notificationPanel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     }
-}
 
 // Close notifications panel when clicking outside
 document.addEventListener('click', function(event) {

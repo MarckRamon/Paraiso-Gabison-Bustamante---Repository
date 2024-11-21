@@ -1,13 +1,15 @@
 body, html {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: #f0f2f5;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 }
+
 
 .container {
     display: flex;
-    height: 100vh;
+    height: 100%;
 }
 
 .sidebar {
@@ -15,6 +17,7 @@ body, html {
     background-color: #5046e4;
     color: white;
 }
+
 
 .sidebar-header {
     padding: 20px;
@@ -52,7 +55,8 @@ body, html {
 .main-content {
     flex-grow: 1;
     padding: 20px;
-    background-color: #fff;
+    box-sizing: border-box;
+    overflow-x: auto;
 }
 
 .content-header {
@@ -174,3 +178,31 @@ body, html {
   .modal {
     display: block; /* Change to block for testing */
 }
+
+.p-8 {
+    padding: 2rem; /* Equivalent to p-8 in Tailwind */
+    width: 100%;
+}
+
+.bg-white {
+    width: 100%;
+    overflow-x: auto; /* Add horizontal scroll if content is too wide */
+}
+
+table {
+    width: 100%;
+    min-width: 900px; /* Ensure readability on smaller screens */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flex {
+        flex-direction: column;
+    }
+    
+    .space-x-4 > * {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+}
+

@@ -31,31 +31,43 @@ def inventory_items(request):
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
     low_stock_threshold = 10
+    
+    # Start with all items
     inventory_items = InventoryItem.objects.all()
 
+    # Apply search filter if provided
     if search_query:
         inventory_items = inventory_items.filter(name__icontains=search_query)
 
+    # Apply category filter if provided
     if category_filter:
-        inventory_items = inventory_items.filter(category__name=category_filter)
+        try:
+            category_id = int(category_filter)
+            inventory_items = inventory_items.filter(category_id=category_id)
+        except (ValueError, TypeError):
+            pass
 
+    # Get low stock items
     low_stock_items = inventory_items.filter(quantity__lt=low_stock_threshold)
 
     if low_stock_items.exists():
         messages.warning(request, f"There are {low_stock_items.count()} items with low stock.")
 
+    # Get all categories
     categories = Category.objects.all()
 
-    print("Categories Debug:", categories)
-
-    return render(request, 'inventory/inventory_items.html', {
+    context = {
         'inventory_items': inventory_items,
         'search_query': search_query,
         'categories': categories,
         'selected_category': category_filter,
         'low_stock_items': low_stock_items,
         'low_stock_threshold': low_stock_threshold,
-    })
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'inventory/partials/inventory_table.html', context)
+    return render(request, 'inventory/inventory_items.html', context)
 
 @login_required
 @csrf_exempt
