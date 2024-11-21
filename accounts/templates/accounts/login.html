@@ -4,127 +4,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Inventory Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Login - Windows 11 Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* General styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
             height: 100vh;
             background-color: #000;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            color: white;
         }
 
         .video-background {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
             z-index: -1;
+            object-fit: cover;
         }
 
         .overlay {
-            position: absolute;
+            position: fixed;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
             z-index: 0;
+        }
+
+        .time {
+            font-size: 5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            z-index: 1;
+        }
+
+        .date {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 3rem;
+            z-index: 1;
         }
 
         .login-container {
             position: relative;
             z-index: 1;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            text-align: center;
-            color: white;
+            width: 400px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .login-header {
-            margin-bottom: 20px;
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
         .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .form-group label {
-            font-size: 0.9em;
+            margin-bottom: 1.5rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
             color: white;
-            font-size: 0.9em;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: rgba(255, 255, 255, 0.5);
+            border-color: #0078D4;
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .login-button {
             width: 100%;
-            padding: 10px;
-            background-color: #1d72b8;
+            padding: 12px;
+            background: #0078D4;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             color: white;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 1em;
+            transition: background 0.3s ease;
         }
 
         .login-button:hover {
-            background-color: #145a86;
+            background: #0086F0;
         }
 
         .error-message {
-            color: #ff6b6b;
-            margin-bottom: 10px;
+            color: #FF4343;
+            margin-bottom: 1rem;
+            text-align: center;
         }
 
         .links {
-            margin-top: 20px;
+            margin-top: 1.5rem;
             display: flex;
             justify-content: space-between;
         }
 
         .links a {
-            color: #1d72b8;
+            color: #0078D4;
             text-decoration: none;
-            font-size: 0.8em;
+            font-size: 0.9rem;
         }
 
         .links a:hover {
             text-decoration: underline;
         }
+
+        @media (max-width: 480px) {
+            .login-container {
+                width: 90%;
+            }
+            
+            .time {
+                font-size: 3rem;
+            }
+            
+            .date {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <video class="video-background" autoplay muted loop>
+    <video class="video-background" autoplay muted loop playsinline>
         <source src="{% static 'win11.mp4' %}" type="video/mp4">
     </video>
     <div class="overlay"></div>
+    
+    <div class="time" id="time">12:00</div>
+    <div class="date" id="date">Monday, January 1</div>
+    
     <div class="login-container">
-        <h2 class="login-header">Welcome Back</h2>
+        <div class="avatar">👤</div>
+        <div class="welcome-text">
+            <h2>Welcome</h2>
+            <p>Sign in to continue</p>
+        </div>
+        
         <form method="POST">
             {% csrf_token %}
             {% if form.non_field_errors %}
@@ -132,27 +184,53 @@
             {% endif %}
             
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username">
+                <input type="text" id="username" name="username" placeholder="Username" autocomplete="username">
                 {% if form.username.errors %}
                     <div class="error-message">{{ form.username.errors }}</div>
                 {% endif %}
             </div>
             
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password">
+                <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password">
                 {% if form.password.errors %}
                     <div class="error-message">{{ form.password.errors }}</div>
                 {% endif %}
             </div>
             
-            <button type="submit" class="login-button">Login</button>
+            <button type="submit" class="login-button">Sign in</button>
         </form>
+        
         <div class="links">
-            <a href="{% url 'register' %}">Register</a>
-            <a href="#">Forgot Password?</a>
+            <a href="{% url 'register' %}">Create account</a>
+            <a href="#">Forgot password?</a>
         </div>
     </div>
+
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Update time
+            const timeElement = document.getElementById('time');
+            timeElement.textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            
+            // Update date
+            const dateElement = document.getElementById('date');
+            dateElement.textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Update immediately and then every second
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
 </body>
 </html>
