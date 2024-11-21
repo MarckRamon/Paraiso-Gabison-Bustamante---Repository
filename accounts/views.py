@@ -1,42 +1,42 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import AdminRegistrationForm, AdminLoginForm
 
-# Register
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = AdminRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('dashboard')  # Redirect to the homepage of the inventory system
+            messages.success(request, 'Registration successful!')
+            return redirect('login')
     else:
-        form = UserCreationForm()
+        form = AdminRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
-# Login
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = AdminLoginForm(request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('dashboard')  # Redirect to the homepage of the inventory system
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid username or password.')
     else:
-        form = AuthenticationForm()
+        form = AdminLoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
-# Logout
 @login_required
 def logout_view(request):
     logout(request)
+    messages.success(request, 'You have been logged out.')
     return redirect('login')
 
 @login_required
 def dashboard(request):
-    user = request.user  # Get the logged-in user's information
-    return render(request, 'inventory/dashboard.html', {'user': user})
-
-
-# Testing if commit is working
+    return render(request, 'inventory/dashboard.html')
