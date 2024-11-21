@@ -7,42 +7,54 @@
 
 <div class="container">
     <main class="main-content">
+        <div class="notification-wrapper">
+            <div class="notification-icon" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                {% if low_stock_items %}
+                <span class="notification-badge">{{ low_stock_items|length }}</span>
+                {% endif %}
+            </div>
+            
+            <div id="notificationPanel" class="notification-panel">
+                <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <button onclick="toggleNotifications()" class="close-notifications">&times;</button>
+                </div>
+                <div class="notification-content">
+                    {% if low_stock_items %}
+                        {% for item in low_stock_items %}
+                        <div class="notification-item">
+                            <div class="notification-title">
+                                <span>Low Stock Alert</span>
+                                <small>{{ item.updated_at|date:"M d, Y" }}</small>
+                            </div>
+                            <p>{{ item.name }} ({{ item.category }}) has reached the minimum threshold. Current quantity: {{ item.quantity }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-notifications">No new notifications</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
         <div class="content-header">
             <h1>Inventory</h1>
-            {% if low_stock_items %}
-            <div class="low-stock-alert">
-                <h3>Low Stock Alert</h3>
-                <p>The following items have stock below the threshold ({{ low_stock_threshold }}):</p>
-                <ul>
-                    {% for item in low_stock_items %}
-                    <li>
-                        <strong>{{ item.name }}</strong> (Category: {{ item.category }}) - 
-                        Quantity: <span style="color: red;">{{ item.quantity }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            
             <div class="search-add">
                 <input type="text" id="searchInput" placeholder="Search item" oninput="searchItems()">
                 <div class="custom-dropdown">
                     <select id="categoryFilter" onchange="filterByCategory()">
                         <option value="">All Categories</option>
                         {% for category in categories %}
-                            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
-                                {{ category }}
+                            <option value="{{ category.id }}" {% if category == selected_category %}selected{% endif %}>
+                                {{ category.name }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
+                <button class="add-category" onclick="openAddCategoryModal()">Add New Category</button>
                 <button class="export ml-2" onclick="exportInventory()">Export</button>
             </div>
         </div>
@@ -88,7 +100,11 @@
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required class="highlighted"><br><br>
                 <label for="category">Category:</label>
-                <input type="text" id="category" name="category" required class="highlighted"><br><br>
+                <select id="category" name="category" required class="highlighted">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select><br><br>
                 <label for="quantity">Quantity:</label>
                 <input type="number" id="quantity" name="quantity" required class="highlighted"><br><br>
                 <label for="price">Price:</label>
@@ -97,28 +113,179 @@
             </form>
         </div>
     </div>
+
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeAddCategoryModal()" class="close">&times;</span>
+            <h2>Add New Category</h2>
+            <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}">
+                {% csrf_token %}
+                <label for="category_name">Category Name:</label>
+                <input type="text" id="category_name" name="category_name" required class="highlighted"><br><br>
+                <button type="submit" class="add-category">Add Category</button>
+            </form>
+        </div>
+    </div>
     
     <div id="editProductModal" class="modal">
         <div class="modal-content">
             <span onclick="closeEditProductModal()" class="close">&times;</span>
             <h2>Edit Product</h2>
-            <form id="editProductForm" class="modal-form" onsubmit="submitEditProduct(event)">
-                <input type="hidden" id="editItemId" name="editItemId">
+            <form id="editItemForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" id="editItemId" name="item_id" value="">
                 <label for="editName">Name:</label>
-                <input type="text" id="editName" name="editName" required><br><br>
+                <input type="text" id="editName" name="name" required>
+                
                 <label for="editCategory">Category:</label>
-                <input type="text" id="editCategory" name="editCategory" required><br><br>
+                <select id="editCategory" name="category" required>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
                 <label for="editQuantity">Quantity:</label>
-                <input type="number" id="editQuantity" name="editQuantity" required><br><br>
+                <input type="number" id="editQuantity" name="quantity" required>
+                
                 <label for="editPrice">Price:</label>
-                <input type="number" id="editPrice" name="editPrice" step="0.01" required><br><br>
-                <button type="submit">Update Product</button>
+                <input type="number" id="editPrice" name="price" step="0.01" required>
+                
+                <button type="submit">Update Item</button>
             </form>
         </div>
     </div>
-    
 
 <style>
+    .notification-wrapper {
+    position: absolute;
+    top: 2px;
+    right: 15px;
+    z-index: 1000;
+}
+
+.notification-icon {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.notification-icon i {
+    font-size: 32px;
+    color: #666;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ff4444;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    min-width: 12px;
+    text-align: center;
+}
+
+.notification-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.close-notifications {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+}
+
+.notification-content {
+    padding: 0;
+}
+
+.notification-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.notification-title span {
+    color: #ff4444;
+    font-weight: 600;
+}
+
+.notification-title small {
+    color: #888;
+}
+
+.notification-item p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.no-notifications {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+/* Scrollbar styling */
+.notification-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-panel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.notification-panel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 .low-stock-alert{
     border: 1px solid red;
     background-color: #ffe6e6;
@@ -287,6 +454,85 @@
 .export:hover {
         background-color: #007B9A; 
     }
+    #editProductModal .modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#editProductModal .modal-content h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
+}
+
+#editProductModal form {
+    display: flex;
+    flex-direction: column;
+}
+
+#editProductModal label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#editProductModal input,
+#editProductModal select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#editProductModal input:focus,
+#editProductModal select:focus {
+    outline: none;
+    border-color: #388e3c;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+#editProductModal button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+#editProductModal button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+}
 </style>
 
 <script>
@@ -349,7 +595,7 @@ function addProductToTable(product) {
         <td>${product.quantity}</td>
         <td>₱${parseFloat(product.price).toFixed(2)}</td>
         <td>
-            <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
+            <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
             <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
         </td>
     `;
@@ -361,19 +607,65 @@ function addProductToTable(product) {
 }
 
 function editItem(itemId) {
-    fetch(`/inventory/get-item/${itemId}/`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('editItemId').value = data.id;
-            document.getElementById('editName').value = data.name;
-            document.getElementById('editCategory').value = data.category;
-            document.getElementById('editQuantity').value = data.quantity;
-            document.getElementById('editPrice').value = data.price;
+    console.log('Attempting to edit item:', itemId);
+    
+    fetch(`/inventory/get-item/${itemId}/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received item data:', data);
+        
+        // Set the form's action attribute dynamically
+        const editForm = document.getElementById('editItemForm');
+        editForm.action = `/inventory/edit-item/${itemId}/`;
+        
+        // Update hidden input for item ID
+        let editItemIdInput = document.getElementById('editItemId');
+        if (!editItemIdInput) {
+            editItemIdInput = document.createElement('input');
+            editItemIdInput.type = 'hidden';
+            editItemIdInput.id = 'editItemId';
+            editItemIdInput.name = 'item_id';
+            editForm.appendChild(editItemIdInput);
+        }
+        editItemIdInput.value = itemId;
+        
+        // Update form fields
+        document.getElementById('editName').value = data.name;
+        document.getElementById('editCategory').value = data.category.id; 
+        document.getElementById('editQuantity').value = data.quantity;
+        document.getElementById('editPrice').value = data.price;
 
-            document.getElementById('editProductModal').style.display = 'block';
-        })
-        .catch(error => console.error('Error:', error));
+        document.getElementById('editProductModal').style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Error in editItem:', error);
+        alert('Failed to load item details. Please check the console for more information.');
+    });
 }
+
+// Ensure form submission is handled
+document.getElementById('editItemForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    submitEditProduct(event);
+});
 
 function closeEditProductModal() {
     document.getElementById('editProductModal').style.display = 'none';
@@ -382,6 +674,7 @@ function closeEditProductModal() {
 function submitEditProduct(event) {
     event.preventDefault();
     const itemId = document.getElementById('editItemId').value;
+    
     const formData = {
         name: document.getElementById('editName').value,
         category: document.getElementById('editCategory').value,
@@ -397,13 +690,24 @@ function submitEditProduct(event) {
         },
         body: JSON.stringify(formData),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Edit product:', data);
-        closeEditProductModal();
+        document.getElementById('editProductModal').style.display = 'none';
         updateProductInTable(data);
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update item. Please check the console for more information.');
+    });
 }
 
 function updateProductInTable(product) {
@@ -417,8 +721,8 @@ function updateProductInTable(product) {
             <td>${product.quantity}</td>
             <td>₱${parseFloat(product.price).toFixed(2)}</td>
             <td>
-                <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
-                <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
+                <button class="edit" onclick="editItem('${item.id}')"><i class="fas fa-edit"></i></button>
+    <button class="delete" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
             </td>
         `;
     }
@@ -507,6 +811,34 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+function toggleNotifications() {
+    const panel = document.getElementById('notificationPanel');
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+    } else {
+        panel.style.display = 'block';
+    }
+}
+
+// Close notifications panel when clicking outside
+document.addEventListener('click', function(event) {
+    const panel = document.getElementById('notificationPanel');
+    const icon = document.querySelector('.notification-icon');
+    if (panel.style.display === 'block' && 
+        !panel.contains(event.target) && 
+        !icon.contains(event.target)) {
+        panel.style.display = 'none';
+    }
+});
+
+
+function openAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'block';
+}
+
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'none';
 }
 </script>
 {% endblock %}

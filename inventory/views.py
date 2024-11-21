@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import InventoryItem, Order, Item
+from .models import InventoryItem, Order, Item, Category
 from decimal import Decimal
 import json
 import openpyxl
@@ -31,20 +33,20 @@ def inventory_items(request):
     low_stock_threshold = 10
     inventory_items = InventoryItem.objects.all()
 
-    
     if search_query:
         inventory_items = inventory_items.filter(name__icontains=search_query)
 
-    
     if category_filter:
-        inventory_items = inventory_items.filter(category=category_filter)
+        inventory_items = inventory_items.filter(category__name=category_filter)
 
-    low_stock_items = inventory_items.filter(quantity=low_stock_threshold)
+    low_stock_items = inventory_items.filter(quantity__lt=low_stock_threshold)
 
     if low_stock_items.exists():
         messages.warning(request, f"There are {low_stock_items.count()} items with low stock.")
 
-    categories = InventoryItem.objects.values_list('category', flat=True).distinct()
+    categories = Category.objects.all()
+
+    print("Categories Debug:", categories)
 
     return render(request, 'inventory/inventory_items.html', {
         'inventory_items': inventory_items,
@@ -53,7 +55,6 @@ def inventory_items(request):
         'selected_category': category_filter,
         'low_stock_items': low_stock_items,
         'low_stock_threshold': low_stock_threshold,
-
     })
 
 @login_required
@@ -63,9 +64,11 @@ def add_product(request):
     try:
         data = json.loads(request.body)
         name = data.get('name')
-        category = data.get('category')
+        category_id = data.get('category')  # Get category ID
         quantity = int(data.get('quantity'))
         price = float(data.get('price'))
+
+        category = Category.objects.get(id=category_id)  # Retrieve the category instance
 
         new_product = InventoryItem(
             name=name,
@@ -78,7 +81,7 @@ def add_product(request):
         return JsonResponse({
             'id': new_product.id,
             'name': new_product.name,
-            'category': new_product.category,
+            'category': new_product.category.name,  # Return category name
             'quantity': new_product.quantity,
             'price': new_product.price,
             'message': 'Product added successfully'
@@ -88,47 +91,55 @@ def add_product(request):
 
 @login_required
 @csrf_exempt
-@require_http_methods(["GET"])
+@require_GET
 def get_item(request, item_id):
     try:
         item = InventoryItem.objects.get(id=item_id)
         return JsonResponse({
             'id': item.id,
             'name': item.name,
-            'category': item.category,
+            'category': {
+                'id': item.category.id,
+                'name': item.category.name
+            },
             'quantity': item.quantity,
-            'price': float(item.price),
+            'price': float(item.price)
         })
     except InventoryItem.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
 
 @login_required
-@csrf_exempt
-@require_http_methods(["POST"])
+@require_POST
+@csrf_protect
 def edit_item(request, item_id):
     try:
-        item = InventoryItem.objects.get(id=item_id)
+        # Parse the JSON data
         data = json.loads(request.body)
-
-        item.name = data.get('name', item.name)
-        item.category = data.get('category', item.category)
-        item.quantity = int(data.get('quantity', item.quantity))
-        item.price = float(data.get('price', item.price))
-
+        
+        # Get the item
+        item = InventoryItem.objects.get(id=item_id)
+        
+        # Update the item
+        item.name = data['name']
+        item.category_id = data['category']
+        item.quantity = data['quantity']
+        item.price = data['price']
         item.save()
-
+        
+        # Return updated item data
         return JsonResponse({
             'id': item.id,
             'name': item.name,
-            'category': item.category,
+            'category': item.category.name,
             'quantity': item.quantity,
-            'price': float(item.price),
-            'message': 'Item updated successfully'
+            'price': float(item.price)
         })
     except InventoryItem.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except KeyError as e:
+        return JsonResponse({'error': f'Missing key: {str(e)}'}, status=400)
 
 @login_required
 @csrf_exempt
@@ -184,7 +195,7 @@ def add_order(request):
         price = Decimal(request.POST.get('price'))
         supplier = request.POST.get('supplier')
 
-        if not all([product_name, quantity, price, supplier]):
+        if not all([product_name, quantity, price]):
             return JsonResponse({
                 'success': False,
                 'error': 'Missing required fields'
@@ -204,16 +215,18 @@ def add_order(request):
                 'error': 'Invalid quantity or price format'
             }, status=400)
 
+        # Ensure you are working with InventoryItem instead of Item
         try:
-            item = Item.objects.get(name=product_name)
-        except Item.DoesNotExist:
-            item = Item.objects.create(
-                name=product_name,
-                supplier=supplier
-            )
+            inventory_item = InventoryItem.objects.get(name=product_name)
+        except InventoryItem.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Inventory item not found. Please add it first.'
+            }, status=404)
 
+        # Create the order
         order = Order.objects.create(
-            item=item,
+            inventory_item=inventory_item,
             quantity=quantity,
             price=price,
             status='Preparing'
@@ -230,6 +243,8 @@ def add_order(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
 
 @login_required
 @csrf_exempt
@@ -262,12 +277,36 @@ def cancel_order(request, order_id):
             'success': False,
             'error': str(e)
         }, status=500)
+    
+def delete_order(request, order_id):
+    if request.method == 'DELETE':
+        order = get_object_or_404(Order, id=order_id)
+        if order.status == 'Cancelled':
+            order.delete()
+            return JsonResponse({'success': True, 'message': 'Order deleted successfully.'})
+        else:
+            return JsonResponse({'success': False, 'error': 'Only cancelled orders can be deleted.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def order_management(request):
-    orders = Order.objects.all().select_related('item')
+    orders = Order.objects.all().select_related('inventory_item')
     return render(request, 'order_management.html', {
         'orders': orders
     })
+def mark_order_as_arrived(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(Order, id=order_id)
+        if order.status != 'Arrived':
+            inventory_item = order.inventory_item
+            inventory_item.quantity += order.quantity
+            inventory_item.save()
+
+            order.status = 'Arrived'
+            order.save()
+
+            return JsonResponse({'success': True, 'message': 'Order marked as arrived and inventory updated.'})
+        return JsonResponse({'success': False, 'message': 'Order is already marked as arrived.'})
+        
 
 @login_required
 def export_inventory(request):
@@ -289,3 +328,13 @@ def export_inventory(request):
     workbook.save(response)
 
     return response
+
+
+def add_category(request):
+    if request.method == 'POST':
+        category_name = request.POST.get('category_name')
+        if category_name:
+            # Create the category if it doesn't already exist
+            Category.objects.get_or_create(name=category_name)
+            return redirect('inventory_items')  # Redirect to the dashboard after adding
+    return HttpResponse("Invalid request", status=400)
