@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import add_category
 
 urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -19,4 +20,5 @@ urlpatterns = [
     path('orders/', views.order_management, name='order_management'),
 
     path('export-inventory/', views.export_inventory, name='export_inventory'),
+    path('add-category/', add_category, name='add_category'),
 ]

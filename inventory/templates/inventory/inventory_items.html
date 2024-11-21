@@ -46,13 +46,14 @@
                     <select id="categoryFilter" onchange="filterByCategory()">
                         <option value="">All Categories</option>
                         {% for category in categories %}
-                            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
-                                {{ category }}
+                            <option value="{{ category.id }}" {% if category == selected_category %}selected{% endif %}>
+                                {{ category.name }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <button class="add-product" onclick="openAddProductModal()">Add New Product</button>
+                <button class="add-category" onclick="openAddCategoryModal()">Add New Category</button>
                 <button class="export ml-2" onclick="exportInventory()">Export</button>
             </div>
         </div>
@@ -98,7 +99,11 @@
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required class="highlighted"><br><br>
                 <label for="category">Category:</label>
-                <input type="text" id="category" name="category" required class="highlighted"><br><br>
+                <select id="category" name="category" required class="highlighted">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select><br><br>
                 <label for="quantity">Quantity:</label>
                 <input type="number" id="quantity" name="quantity" required class="highlighted"><br><br>
                 <label for="price">Price:</label>
@@ -107,26 +112,49 @@
             </form>
         </div>
     </div>
+
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeAddCategoryModal()" class="close">&times;</span>
+            <h2>Add New Category</h2>
+            <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}">
+                {% csrf_token %}
+                <label for="category_name">Category Name:</label>
+                <input type="text" id="category_name" name="category_name" required class="highlighted"><br><br>
+                <button type="submit" class="add-category">Add Category</button>
+            </form>
+        </div>
+    </div>
     
     <div id="editProductModal" class="modal">
         <div class="modal-content">
             <span onclick="closeEditProductModal()" class="close">&times;</span>
             <h2>Edit Product</h2>
-            <form id="editProductForm" class="modal-form" onsubmit="submitEditProduct(event)">
-                <input type="hidden" id="editItemId" name="editItemId">
+            <form id="editItemForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" id="editItemId" name="item_id" value="">
                 <label for="editName">Name:</label>
-                <input type="text" id="editName" name="editName" required><br><br>
+                <input type="text" id="editName" name="name" required>
+                
                 <label for="editCategory">Category:</label>
-                <input type="text" id="editCategory" name="editCategory" required><br><br>
+                <select id="editCategory" name="category" required>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
                 <label for="editQuantity">Quantity:</label>
-                <input type="number" id="editQuantity" name="editQuantity" required><br><br>
+                <input type="number" id="editQuantity" name="quantity" required>
+                
                 <label for="editPrice">Price:</label>
-                <input type="number" id="editPrice" name="editPrice" step="0.01" required><br><br>
-                <button type="submit">Update Product</button>
+                <input type="number" id="editPrice" name="price" step="0.01" required>
+                
+                <button type="submit">Update Item</button>
             </form>
         </div>
     </div>
-    
 
 <style>
     .notification-wrapper {
@@ -425,6 +453,85 @@
 .export:hover {
         background-color: #007B9A; 
     }
+    #editProductModal .modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#editProductModal .modal-content h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
+}
+
+#editProductModal form {
+    display: flex;
+    flex-direction: column;
+}
+
+#editProductModal label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#editProductModal input,
+#editProductModal select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#editProductModal input:focus,
+#editProductModal select:focus {
+    outline: none;
+    border-color: #388e3c;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+#editProductModal button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+#editProductModal button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+}
 </style>
 
 <script>
@@ -487,7 +594,7 @@ function addProductToTable(product) {
         <td>${product.quantity}</td>
         <td>₱${parseFloat(product.price).toFixed(2)}</td>
         <td>
-            <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
+            <button class="edit" onclick="editItem('{{ item.id }}')"><i class="fas fa-edit"></i></button>
             <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
         </td>
     `;
@@ -499,19 +606,65 @@ function addProductToTable(product) {
 }
 
 function editItem(itemId) {
-    fetch(`/inventory/get-item/${itemId}/`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('editItemId').value = data.id;
-            document.getElementById('editName').value = data.name;
-            document.getElementById('editCategory').value = data.category;
-            document.getElementById('editQuantity').value = data.quantity;
-            document.getElementById('editPrice').value = data.price;
+    console.log('Attempting to edit item:', itemId);
+    
+    fetch(`/inventory/get-item/${itemId}/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received item data:', data);
+        
+        // Set the form's action attribute dynamically
+        const editForm = document.getElementById('editItemForm');
+        editForm.action = `/inventory/edit-item/${itemId}/`;
+        
+        // Update hidden input for item ID
+        let editItemIdInput = document.getElementById('editItemId');
+        if (!editItemIdInput) {
+            editItemIdInput = document.createElement('input');
+            editItemIdInput.type = 'hidden';
+            editItemIdInput.id = 'editItemId';
+            editItemIdInput.name = 'item_id';
+            editForm.appendChild(editItemIdInput);
+        }
+        editItemIdInput.value = itemId;
+        
+        // Update form fields
+        document.getElementById('editName').value = data.name;
+        document.getElementById('editCategory').value = data.category.id; 
+        document.getElementById('editQuantity').value = data.quantity;
+        document.getElementById('editPrice').value = data.price;
 
-            document.getElementById('editProductModal').style.display = 'block';
-        })
-        .catch(error => console.error('Error:', error));
+        document.getElementById('editProductModal').style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Error in editItem:', error);
+        alert('Failed to load item details. Please check the console for more information.');
+    });
 }
+
+// Ensure form submission is handled
+document.getElementById('editItemForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    submitEditProduct(event);
+});
 
 function closeEditProductModal() {
     document.getElementById('editProductModal').style.display = 'none';
@@ -520,6 +673,7 @@ function closeEditProductModal() {
 function submitEditProduct(event) {
     event.preventDefault();
     const itemId = document.getElementById('editItemId').value;
+    
     const formData = {
         name: document.getElementById('editName').value,
         category: document.getElementById('editCategory').value,
@@ -535,13 +689,24 @@ function submitEditProduct(event) {
         },
         body: JSON.stringify(formData),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Edit product:', data);
-        closeEditProductModal();
+        document.getElementById('editProductModal').style.display = 'none';
         updateProductInTable(data);
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update item. Please check the console for more information.');
+    });
 }
 
 function updateProductInTable(product) {
@@ -555,8 +720,8 @@ function updateProductInTable(product) {
             <td>${product.quantity}</td>
             <td>₱${parseFloat(product.price).toFixed(2)}</td>
             <td>
-                <button class="edit" onclick="editItem('${product.id}')"><i class="fas fa-edit"></i></button>
-                <button class="delete" onclick="deleteItem('${product.id}')"><i class="fas fa-trash"></i></button>
+                <button class="edit" onclick="editItem('${item.id}')"><i class="fas fa-edit"></i></button>
+    <button class="delete" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
             </td>
         `;
     }
@@ -665,5 +830,14 @@ document.addEventListener('click', function(event) {
         panel.style.display = 'none';
     }
 });
+
+
+function openAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'block';
+}
+
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').style.display = 'none';
+}
 </script>
 {% endblock %}
