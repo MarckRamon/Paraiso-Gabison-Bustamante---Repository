@@ -5,129 +5,199 @@
     {% load humanize %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockHub Dashboard</title>
+    <title>StockHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .macos-window {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .sidebar-item {
+            margin: 4px 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .macos-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: all 0.2s;
+        }
+        .macos-input:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+        }
+        .macos-button {
+            background: linear-gradient(to bottom, #4f8ff0, #0066cc);
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .macos-button:hover {
+            background: linear-gradient(to bottom, #5a99f5, #0057b3);
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-['Inter']">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-8">
-            <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-                <span class="text-white text-xl font-bold">S</span>
-            </div>
-            <nav class="flex flex-col space-y-6">
-                <a href="{% url 'dashboard' %}" class="p-3 rounded-xl {% if request.path == '/dashboard/' %}bg-black text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
-                    <i class="fas fa-home"></i>
-                </a>
-                <a href="{% url 'inventory_items' %}" class="p-3 rounded-xl {% if request.path == '/inventory-items/' %}bg-black text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
-                    <i class="fas fa-boxes"></i>
-                </a>
-                <a href="{% url 'order_management' %}" class="p-3 rounded-xl {% if request.path == '/orders/' %}bg-black text-white{% else %}text-gray-500 hover:bg-gray-100{% endif %}">
-                    <i class="fas fa-clipboard-check"></i>
-                </a>
-                <a href="{% url 'logout' %}" class="p-3 rounded-xl text-gray-500 hover:bg-gray-100">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-            </nav>
-        </aside>
+<body class="bg-[#f5f5f7] h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 macos-window bg-[#28282b] text-white flex flex-col h-full" x-data="{ open: true }">
+        <div class="flex items-center p-6">
+            <h2 class="text-xl font-semibold">StockHub</h2>
+        </div>
+        <nav class="mt-4 flex-grow" :class="{'hidden': !open, 'block': open}">
+            <a class="sidebar-item flex items-center" href="{% url 'dashboard' %}">
+                <i class="fas fa-chart-line w-5"></i>
+                <span class="ml-3">Dashboard</span>
+            </a>
+            <a class="sidebar-item flex items-center" href="{% url 'inventory_items' %}">
+                <i class="fas fa-boxes w-5"></i>
+                <span class="ml-3">Inventory</span>
+            </a>
+            <a class="sidebar-item flex items-center" href="{% url 'order_management' %}">
+                <i class="fas fa-clipboard-check w-5"></i>
+                <span class="ml-3">Orders</span>
+            </a>
+            <a class="sidebar-item flex items-center mt-auto" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt w-5"></i>
+                <span class="ml-3">Logout</span>
+            </a>
+        </nav>
+    </aside>
 
-        <!-- Main Content -->
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-auto">
         {% block content %}
-        <main class="flex-1 overflow-x-hidden p-4 md:p-8">
-            <header class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-4">Stockhub Dashboard</h1>
-                <!-- User Information Card -->
-                <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-gray-700">User Information</h2>
-                        <button onclick="toggleEditModal()" class="text-blue-600 hover:text-blue-800 transition-colors">
-                            <i class="fas fa-edit mr-2"></i>Edit Profile
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-600 font-medium mb-2">First Name</label>
-                            <p class="text-gray-800 font-semibold">{{ user.first_name }}</p>
+        <div class="macos-window rounded-xl p-8">
+            <h1 class="text-2xl font-semibold mb-8">Welcome, {{ user.username }}</h1>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- User Profile -->
+                <div class="macos-window rounded-xl p-6 bg-white bg-opacity-50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-800">
+                        <i class="fas fa-user-circle text-blue-500 mr-2"></i> Profile
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-envelope text-blue-400 w-5"></i>
+                            <span class="ml-3">{{ user.email|default:"Add email" }}</span>
                         </div>
-                        <div>
-                            <label class="block text-gray-600 font-medium mb-2">Last Name</label>
-                            <p class="text-gray-800 font-semibold">{{ user.last_name }}</p>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-user text-blue-400 w-5"></i>
+                            <span class="ml-3">{{ user.first_name|default:"Add first name" }}</span>
                         </div>
-                        <div class="col-span-2">
-                            <label class="block text-gray-600 font-medium mb-2">Email</label>
-                            <p class="text-gray-800 font-semibold">{{ user.email }}</p>
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-user text-blue-400 w-5"></i>
+                            <span class="ml-3">{{ user.last_name|default:"Add last name" }}</span>
                         </div>
                     </div>
                 </div>
 
-                        <!-- Edit Profile Modal -->
-                <div id="editProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-                    <div class="bg-white rounded-lg shadow-xl p-8 w-96">
-                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Edit Profile</h2>
-                        <form id="editProfileForm" method="POST" action="{% url 'edit_user_info' %}">
-                            {% csrf_token %}
-                            <div class="mb-4">
-                                <label for="first_name" class="block text-gray-600 font-medium mb-2">First Name</label>
-                                <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="mb-4">
-                                <label for="last_name" class="block text-gray-600 font-medium mb-2">Last Name</label>
-                                <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="mb-6">
-                                <label for="email" class="block text-gray-600 font-medium mb-2">Email</label>
-                                <input type="email" id="email" name="email" value="{{ user.email }}" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="flex justify-end space-x-4">
-                                <button type="button" onclick="toggleEditModal()" 
-                                        class="text-gray-600 hover:text-gray-800 mr-4">
-                                    Cancel
-                                </button>
-                                <button type="submit" 
-                                        class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
-                                    Save Changes
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Inventory Statistics -->
-                <div class="grid grid-cols-3 gap-6">
-                    <div class="bg-white shadow-md rounded-lg p-6 text-center">
-                        <h3 class="text-gray-600 mb-2">Total Inventory Value</h3>
-                        <div class="text-3xl font-bold text-blue-600">
-                            ₱{{ total_inventory_value|intcomma }}
+                <!-- KPIs -->
+                <div class="macos-window rounded-xl p-6 bg-white bg-opacity-50">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center text-gray-800">
+                        <i class="fas fa-chart-pie text-purple-500 mr-2"></i> Overview
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-money-bill-wave text-green-500 w-5"></i>
+                            <span class="ml-3">₱{{ total_inventory_value|intcomma }}</span>
                         </div>
-                    </div>
-                    <div class="bg-white shadow-md rounded-lg p-6 text-center">
-                        <h3 class="text-gray-600 mb-2">Total Items in Stock</h3>
-                        <div class="text-3xl font-bold text-green-600">
-                            {{ total_items_in_stock }}
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-boxes text-blue-500 w-5"></i>
+                            <span class="ml-3">{{ total_items_in_stock }} items in stock</span>
                         </div>
-                    </div>
-                    <div class="bg-white shadow-md rounded-lg p-6 text-center">
-                        <h3 class="text-gray-600 mb-2">Low Stock Items</h3>
-                        <div class="text-3xl font-bold text-red-600">
-                            {{ low_stock_count }}
+                        <div class="flex items-center text-gray-600">
+                            <i class="fas fa-exclamation-triangle text-red-500 w-5"></i>
+                            <span class="ml-3">{{ low_stock_count }} items low stock</span>
                         </div>
                     </div>
                 </div>
-            </header>
-        </main>
+            </div>
 
-        <script>
-            function toggleEditModal() {
-                const modal = document.getElementById('editProfileModal');
-                modal.classList.toggle('hidden');
-            }
-            </script>
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mb-8">
+                {% if not user.email or not user.first_name or not user.last_name %}
+                    <button onclick="toggleAddForm()" class="macos-button">
+                        Add Profile Info
+                    </button>
+                {% else %}
+                    <button onclick="toggleEditForm()" class="macos-button">
+                        Edit Profile
+                    </button>
+                {% endif %}
+            </div>
+
+            <!-- Forms -->
+            <div id="addUserInfoForm" class="macos-window rounded-xl p-6 hidden">
+                <h2 class="text-xl font-semibold mb-6">Add Profile Information</h2>
+                <form action="{% url 'add_user_info' %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" name="email" class="macos-input w-full" placeholder="Enter your email">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <input type="text" name="first_name" class="macos-input w-full" placeholder="Enter your first name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <input type="text" name="last_name" class="macos-input w-full" placeholder="Enter your last name">
+                    </div>
+                    <button type="submit" class="macos-button w-full">Save Changes</button>
+                </form>
+            </div>
+
+            <div id="editUserInfoForm" class="macos-window rounded-xl p-6 hidden">
+                <h2 class="text-xl font-semibold mb-6">Edit Profile Information</h2>
+                <form action="{% url 'edit_user_info' %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" name="email" class="macos-input w-full" value="{{ user.email }}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <input type="text" name="first_name" class="macos-input w-full" value="{{ user.first_name }}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <input type="text" name="last_name" class="macos-input w-full" value="{{ user.last_name }}">
+                    </div>
+                    <button type="submit" class="macos-button w-full">Update Profile</button>
+                </form>
+            </div>
+        </div>
         {% endblock %}
-    </div>
+    </main>
+
+    <script>
+        function toggleAddForm() {
+            document.getElementById("addUserInfoForm").classList.toggle("hidden");
+            document.getElementById("editUserInfoForm").classList.add("hidden");
+        }
+        function toggleEditForm() {
+            document.getElementById("editUserInfoForm").classList.toggle("hidden");
+            document.getElementById("addUserInfoForm").classList.add("hidden");
+        }
+    </script>
 </body>
 </html>
