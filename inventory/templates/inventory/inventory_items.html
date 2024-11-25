@@ -104,35 +104,50 @@
 </div>
 
 <!-- Add Product Modal -->
-<div id="addProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Add Product</h3>
-            <form id="addProductForm" class="mt-4">
+<div id="addProductModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-6 border max-w-md shadow-lg rounded-lg bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Add Product</h3>
+                <button onclick="closeAddProductModal()" class="text-gray-400 hover:text-gray-500 transition-colors">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+            <form id="addProductForm" class="space-y-5">
                 {% csrf_token %}
-                <div class="mb-4">
-                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                    <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
                 </div>
-                <div class="mb-4">
-                    <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="category" name="category" required
+                            class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
                         {% for category in categories %}
                             <option value="{{ category.id }}">{{ category.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-4">
-                    <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                    <input type="number" id="quantity" name="quantity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
                 </div>
-                <div class="mb-4">
-                    <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
-                    <input type="number" id="price" name="price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div>
+                    <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                    <input type="number" id="price" name="price" step="0.01" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
                 </div>
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Product</button>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeAddProductModal()"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        Add Product
+                    </button>
                 </div>
             </form>
         </div>
@@ -169,62 +184,89 @@
             </div>
         </div>
     </div>
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-6 border max-w-md shadow-lg rounded-lg bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Add New Category</h3>
+                <button onclick="closeAddCategoryModal()" class="text-gray-400 hover:text-gray-500 transition-colors">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+            <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label for="category_name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+                    <input type="text" id="category_name" name="category_name" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeAddCategoryModal()"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        Add Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    <div id="addCategoryModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Category</h3>
-                <form id="addCategoryForm" method="POST" action="{% url 'add_category' %}" class="mt-4">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <label for="category_name" class="block text-sm font-medium text-gray-700">Category Name</label>
-                        <input type="text" id="category_name" name="category_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeAddCategoryModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Category</button>
-                    </div>
-                </form>
+<!-- Edit Product Modal -->
+<div id="editProductModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-6 border max-w-md shadow-lg rounded-lg bg-white">
+        <div class="mt-2">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Edit Product</h3>
+                <button onclick="closeEditProductModal()" class="text-gray-400 hover:text-gray-500 transition-colors">
+                    <span class="text-2xl">&times;</span>
+                </button>
             </div>
+            <form id="editItemForm" class="space-y-5">
+                {% csrf_token %}
+                <input type="hidden" id="editItemId" name="item_id">
+                <div>
+                    <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="editName" name="name" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label for="editCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="editCategory" name="category" required
+                            class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="editQuantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" id="editQuantity" name="quantity" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label for="editPrice" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                    <input type="number" id="editPrice" name="price" step="0.01" required
+                           class="w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeEditProductModal()"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                        Update Product
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    
-    <!-- Edit Product Modal -->
-    <div id="editProductModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Product</h3>
-                <form id="editItemForm" class="mt-4">
-                    {% csrf_token %}
-                    <input type="hidden" id="editItemId" name="item_id">
-                    <div class="mb-4">
-                        <label for="editName" class="block text-sm font-medium text-gray-700">Name</label>
-                        <input type="text" id="editName" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="editCategory" class="block text-sm font-medium text-gray-700">Category</label>
-                        <select id="editCategory" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label for="editQuantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                        <input type="number" id="editQuantity" name="quantity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label for="editPrice" class="block text-sm font-medium text-gray-700">Price</label>
-                        <input type="number" id="editPrice" name="price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="closeEditProductModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Update Product</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+</div>
     
 
     <style>
