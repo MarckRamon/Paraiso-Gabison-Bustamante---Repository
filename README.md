@@ -42,7 +42,7 @@
 <div align="center">
   <h1>🖼 Website Showcase 🖼</h1>
   <p>Explore the interface of StockHub below:</p>
-  <img src="images/slideshow.gif" alt="StockHub Website Showcase" width="800px">
+  <img src="images/https://i.imgur.com/rx1dMvK.png" alt="StockHub Website Showcase" width="800px">
 </div>
 
 <hr>
