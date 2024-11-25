@@ -1,12 +1,28 @@
 <div align="center">
-  <h1>📦 StockHub 📦</h2>
+  <h1>📦 StockHub 📦</h1>
   <p>An Inventory Management System</p>
 </div>
 
 <hr>
 
+## 📄 Project Description
+**StockHub** is an advanced **Inventory Management System** designed to streamline inventory operations with essential features like secure authentication, product catalog management, stock level tracking, manual order processing, and search functionality. The system enhances inventory accuracy and efficiency, enabling businesses to manage their inventory effectively. Below are the core functional requirements of StockHub:
+
+### 🛠 Functional Requirements
+
+| Task | Function                     | Description                                                                                       | Priority | Inputs                     | Outputs                            |
+|------|------------------------------|---------------------------------------------------------------------------------------------------|----------|---------------------------|------------------------------------|
+| T1   | User Authentication and Access | Secure login for authorized users only.                                                          | High     | Username, Password        | Access Granted/Denied             |
+| T2   | Product Catalog Management   | Manage and categorize products within a comprehensive catalog.                                    | High     | Product Name, SKU, Category | Updated Product Catalog           |
+| T3   | Stock Level Tracking         | Monitor and update stock levels to ensure inventory accuracy.                                     | High     | Returns, Incoming Stock    | Current Stock Levels, Alerts      |
+| T4   | Export Data                  | Export inventory data locally in Excel/CSV format.                                               | Low      | Inventory Data            | Excel/CSV File                    |
+| T5   | Manual Order Management      | Create and track purchase orders, including order date, supplier, and status.                    | High     | Order Date, Supplier, Items | Orders Created/Updated            |
+| T6   | Search                       | Search for a specific item within the inventory.                                                 | Medium   | Item Name                 | Item                               |
+
+<hr>
+
 <div align="center">
- <h1>🔗 Links 🔗</h2>
+ <h1>🔗 Links 🔗</h1>
   <a href="https://cebuinstituteoftechnology-my.sharepoint.com/:x:/g/personal/marckramon_paraiso_cit_edu/ESvHrUMQAIdOkJQLlvvrR14BBPw7taN_yPC4nf0f02SzAA?e=O2NJAX">
     <img src="https://img.shields.io/badge/Gantt_Chart-Link-blue?style=for-the-badge&logoColor=white" alt="Gantt Chart">
   </a>
@@ -23,9 +39,16 @@
 
 <hr>
 
+<div align="center">
+  <h1>🖼 Website Showcase 🖼</h1>
+  <p>Explore the interface of StockHub below:</p>
+  <img src="images/slideshow.gif" alt="StockHub Website Showcase" width="800px">
+</div>
+
+<hr>
 
 <div align="center">
-  <h1>🧑‍🤝‍🧑 Team Members 🧑‍🤝‍🧑</h2>
+  <h1>🧑‍🤝‍🧑 Team Members 🧑‍🤝‍🧑</h1>
   <table>
     <tr>
       <td align="center">
@@ -43,4 +66,3 @@
     </tr>
   </table>
 </div>
-
