@@ -7,7 +7,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import InventoryItem, Order, Item, Category
+from .models import InventoryItem, Order, Supplier, Category
 from decimal import Decimal
 import json
 import openpyxl
@@ -193,9 +193,8 @@ def add_user_info(request):
     return render(request, 'inventory/add_user_info.html')
 
 def order_management(request):
-    orders = Order.objects.all()
-    inventory_items = Item.objects.all()
-    return render(request, 'order_management.html', {'orders': orders, 'inventory_items': inventory_items})
+    orders = Order.objects.all().select_related('inventory_item', 'supplier')
+    return render(request, 'order_management.html', {'orders': orders})
 
 @login_required
 @csrf_exempt
@@ -205,9 +204,9 @@ def add_order(request):
         product_name = request.POST.get('productName')
         quantity = request.POST.get('quantity')
         price = Decimal(request.POST.get('price'))
-        supplier = request.POST.get('supplier')
+        supplier_id = request.POST.get('supplier')  # Change to get supplier ID
 
-        if not all([product_name, quantity, price]):
+        if not all([product_name, quantity, price, supplier_id]):
             return JsonResponse({
                 'success': False,
                 'error': 'Missing required fields'
@@ -227,7 +226,7 @@ def add_order(request):
                 'error': 'Invalid quantity or price format'
             }, status=400)
 
-        # Ensure you are working with InventoryItem instead of Item
+        # Ensure you are working with InventoryItem
         try:
             inventory_item = InventoryItem.objects.get(name=product_name)
         except InventoryItem.DoesNotExist:
@@ -236,9 +235,19 @@ def add_order(request):
                 'error': 'Inventory item not found. Please add it first.'
             }, status=404)
 
+        # Ensure the supplier exists
+        try:
+            supplier = Supplier.objects.get(id=supplier_id)
+        except Supplier.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Supplier not found.'
+            }, status=404)
+
         # Create the order
         order = Order.objects.create(
             inventory_item=inventory_item,
+            supplier=supplier,  # Add supplier to the order
             quantity=quantity,
             price=price,
             status='Preparing'
@@ -255,7 +264,6 @@ def add_order(request):
             'success': False,
             'error': str(e)
         }, status=500)
-
 
 
 @login_required
@@ -350,3 +358,42 @@ def add_category(request):
             Category.objects.get_or_create(name=category_name)
             return redirect('inventory_items')  # Redirect to the dashboard after adding
     return HttpResponse("Invalid request", status=400)
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_supplier(request):
+    try:
+        supplier_name = request.POST.get('supplierName')
+        supplier_contact = request.POST.get('supplierContact')
+
+        if not all([supplier_name, supplier_contact]):
+            return JsonResponse({
+                'success': False,
+                'error': 'Missing required fields'
+            }, status=400)
+
+        # Create the supplier
+        supplier = Supplier.objects.create(
+            name=supplier_name,
+            contact=supplier_contact
+        )
+
+        return JsonResponse({
+            'success': True,
+            'supplierId': supplier.id,
+            'message': 'Supplier added successfully'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+@require_GET
+def list_suppliers(request):
+    suppliers = Supplier.objects.all()
+    supplier_list = [{'id': s.id, 'name': s.name} for s in suppliers]
+    return JsonResponse({'suppliers': supplier_list})
