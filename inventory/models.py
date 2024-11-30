@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from decimal import Decimal
+from django.contrib.auth import get_user_model
 
 class Category(models.Model):
     CATEGORY_CHOICES = [
@@ -22,6 +23,14 @@ class InventoryItem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    added_by = models.ForeignKey(
+        get_user_model(), 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='inventory_items'
+    )
 
 class Supplier(models.Model):
     name = models.CharField(max_length=255)

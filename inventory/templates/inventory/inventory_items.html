@@ -154,14 +154,14 @@
     </div>
 </div>
 
-    <!-- Notification System -->
-    <div class="notification-wrapper absolute top-2 right-6 z-50">
-        <div class="notification-icon" onclick="toggleNotifications()">
-            <i class="fas fa-bell"></i>
+<!-- Notification System -->
+<div class="notification-wrapper absolute top-5 left-25 z-50">
+    <div class="notification-icon" onclick="toggleNotifications()">
+        <i class="fas fa-bell"></i>
             {% if low_stock_items %}
             <span class="notification-badge">{{ low_stock_items|length }}</span>
             {% endif %}
-        </div>
+    </div>
         <div id="notificationPanel" class="notification-panel">
             <div class="notification-header">
                 <h3>Notifications</h3>
@@ -182,8 +182,8 @@
                     <p class="no-notifications">No new notifications</p>
                 {% endif %}
             </div>
-        </div>
     </div>
+</div>
 <!-- Add Category Modal -->
 <div id="addCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
     <div class="relative top-20 mx-auto p-6 border max-w-md shadow-lg rounded-lg bg-white">
@@ -273,8 +273,8 @@
         /* Notification Wrapper */
         .notification-wrapper {
             position: absolute;
-            top: 35px;
-            right: 955px;
+            top: 5px;
+            right: 1.5px;
             z-index: 1000;
         }
         
