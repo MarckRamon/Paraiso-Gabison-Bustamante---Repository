@@ -1,3 +1,4 @@
+
 <div align="center">
   <h1>📦 StockHub 📦</h1>
   <p>An Inventory Management System</p>
@@ -18,6 +19,31 @@
 | T4   | Export Data                  | Export inventory data locally in Excel/CSV format.                                               | Low      | Inventory Data            | Excel/CSV File                    |
 | T5   | Manual Order Management      | Create and track purchase orders, including order date, supplier, and status.                    | High     | Order Date, Supplier, Items | Orders Created/Updated            |
 | T6   | Search                       | Search for a specific item within the inventory.                                                 | Medium   | Item Name                 | Item                               |
+
+<hr>
+
+## 🚀 Installation Process
+
+To get started with StockHub, follow these steps:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/MarckRamon/Paraiso-Gabison-Bustamante---Repository.git
+   ```
+
+2. **Navigate to the project directory:**
+   ```bash
+   cd Paraiso-Gabison-Bustamante---Repository
+   ```
+
+3. **Start the application:**
+   ```bash
+   py manage.py runserver
+   ```
+   or
+   ```bash
+   python manage.py runserver
+   ```
 
 <hr>
 
