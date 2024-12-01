@@ -32,14 +32,14 @@ def inventory_items(request):
     category_filter = request.GET.get('category', '')
     low_stock_threshold = 10
     
-    # Start with all items
+    # Gets all items
     inventory_items = InventoryItem.objects.all()
 
-    # Apply search filter if provided
+    
     if search_query:
         inventory_items = inventory_items.filter(name__icontains=search_query)
 
-    # Apply category filter if provided
+
     if category_filter:
         try:
             category_id = int(category_filter)
@@ -47,7 +47,7 @@ def inventory_items(request):
         except (ValueError, TypeError):
             pass
 
-    # Get low stock items
+    
     low_stock_items = inventory_items.filter(quantity__lt=low_stock_threshold)
 
     if low_stock_items.exists():
@@ -204,7 +204,7 @@ def add_order(request):
         product_name = request.POST.get('productName')
         quantity = request.POST.get('quantity')
         price = Decimal(request.POST.get('price'))
-        supplier_id = request.POST.get('supplier')  # Change to get supplier ID
+        supplier_id = request.POST.get('supplier')  # get supplier ID
 
         if not all([product_name, quantity, price, supplier_id]):
             return JsonResponse({
@@ -226,7 +226,7 @@ def add_order(request):
                 'error': 'Invalid quantity or price format'
             }, status=400)
 
-        # Ensure you are working with InventoryItem
+        # Ensures you are working with InventoryItem
         try:
             inventory_item = InventoryItem.objects.get(name=product_name)
         except InventoryItem.DoesNotExist:
@@ -235,7 +235,7 @@ def add_order(request):
                 'error': 'Inventory item not found. Please add it first.'
             }, status=404)
 
-        # Ensure the supplier exists
+        # Ensures the supplier exists
         try:
             supplier = Supplier.objects.get(id=supplier_id)
         except Supplier.DoesNotExist:
@@ -356,7 +356,7 @@ def add_category(request):
         if category_name:
             # Create the category if it doesn't already exist
             Category.objects.get_or_create(name=category_name)
-            return redirect('inventory_items')  # Redirect to the dashboard after adding
+            return redirect('inventory_items')  
     return HttpResponse("Invalid request", status=400)
 
 @login_required
@@ -373,7 +373,7 @@ def add_supplier(request):
                 'error': 'Missing required fields'
             }, status=400)
 
-        # Create the supplier
+        # Creates the supplier
         supplier = Supplier.objects.create(
             name=supplier_name,
             contact=supplier_contact
