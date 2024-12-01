@@ -11,15 +11,16 @@
 
 ### 🛠 Functional Requirements
 
-| Task | Function                     | Description                                                                                       | Priority | Inputs                     | Outputs                            |
-|------|------------------------------|---------------------------------------------------------------------------------------------------|----------|---------------------------|------------------------------------|
-| T1   | User Authentication and Access | Secure login for authorized users only.                                                          | High     | Username, Password        | Access Granted/Denied             |
-| T2   | Product Catalog Management   | Manage and categorize products within a comprehensive catalog.                                    | High     | Product Name, SKU, Category | Updated Product Catalog           |
-| T3   | Stock Level Tracking         | Monitor and update stock levels to ensure inventory accuracy.                                     | High     | Returns, Incoming Stock    | Current Stock Levels, Alerts      |
-| T4   | Export Data                  | Export inventory data locally in Excel/CSV format.                                               | Low      | Inventory Data            | Excel/CSV File                    |
-| T5   | Manual Order Management      | Create and track purchase orders, including order date, supplier, and status.                    | High     | Order Date, Supplier, Items | Orders Created/Updated            |
-| T6   | Search                       | Search for a specific item within the inventory.                                                 | Medium   | Item Name                 | Item                               |
-
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <ul style="line-height: 1.8; font-size: 1.1rem;">
+    <li><strong>User Authentication and Access:</strong> Provides secure login functionality for authorized users to access the system. Ensures data protection by granting or denying access based on credentials. This enhances system security by preventing unauthorized usage.</li>
+    <li><strong>Product Catalog Management:</strong> Allows users to add, edit, and categorize products within an organized catalog. Simplifies product tracking with attributes such as name, status, and category. Ensures the catalog is updated in real-time for accurate inventory records.</li>
+    <li><strong>Stock Level Tracking:</strong> Tracks and updates stock levels for all items in the inventory. Provides alerts and notifications for low-stock items to prevent shortages. Ensures accurate stock management through real-time monitoring.</li>
+    <li><strong>Export Data:</strong> Enables users to export inventory data in Excel or CSV formats. Facilitates offline reporting and sharing with other stakeholders. This provides flexibility in managing and analyzing data outside the system.</li>
+    <li><strong>Manual Order Management:</strong> Allows users to create and track purchase orders for inventory items. Includes details such as supplier, and status to streamline procurement. This ensures transparency and accountability in the ordering process.</li>
+    <li><strong>Search & Filter:</strong> Offers a quick search feature to locate specific items in the inventory and also filters items by category and status. This reduces time spent navigating large datasets and supports efficient management and retrieval of inventory details.</li>
+  </ul>
+</div>
 <hr>
 
 ## 🚀 Installation Process
@@ -28,12 +29,12 @@ To get started with StockHub, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/MarckRamon/Paraiso-Gabison-Bustamante---Repository.git
+   git clone https://github.com/MarckRamon/StockHub.git
    ```
 
 2. **Navigate to the project directory:**
    ```bash
-   cd Paraiso-Gabison-Bustamante---Repository
+   cd StockHub
    ```
 
 3. **Start the application:**
@@ -68,7 +69,11 @@ To get started with StockHub, follow these steps:
 <div align="center">
   <h1>🖼 Website Showcase 🖼</h1>
   <p>Explore the interface of StockHub below:</p>
-  <img src="images/https://i.imgur.com/rx1dMvK.png" alt="StockHub Website Showcase" width="800px">
+  <div style="display: flex; justify-content: center; gap: 20px;">
+    <img src="https://media.discordapp.net/attachments/1003993911187996752/1312784805867290634/Screenshot_2024-12-01_221230.png?ex=674dc1a0&is=674c7020&hm=9904d86d91424f3a9d9e5d5362712579981fbadb3f393133843e0448efd39841&=&format=webp&quality=lossless&width=1269&height=644" alt="StockHub Dashboard" width="250px">
+    <img src="https://media.discordapp.net/attachments/1003993911187996752/1312784806211354664/Screenshot_2024-12-01_221247.png?ex=674dc1a0&is=674c7020&hm=9fad498a00c08fa887077765b8e21ddd732266799499bd2bcc909b9273297b81&=&format=webp&quality=lossless&width=1267&height=644" alt="StockHub Inventory" width="250px">
+    <img src="https://media.discordapp.net/attachments/1003993911187996752/1312784806618333285/Screenshot_2024-12-01_221258.png?ex=674dc1a0&is=674c7020&hm=16a574ba407054ace5644558b40f14fe2594a74cc3a0544b904875827d326a41&=&format=webp&quality=lossless&width=1270&height=644" alt="StockHub Order Management" width="250px">
+  </div>
 </div>
 
 <hr>
