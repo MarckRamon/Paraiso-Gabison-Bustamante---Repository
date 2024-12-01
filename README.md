@@ -50,17 +50,23 @@ To get started with StockHub, follow these steps:
 
 <div align="center">
  <h1>🔗 Links 🔗</h1>
-  <a href="https://cebuinstituteoftechnology-my.sharepoint.com/:x:/g/personal/marckramon_paraiso_cit_edu/ESvHrUMQAIdOkJQLlvvrR14BBPw7taN_yPC4nf0f02SzAA?e=O2NJAX">
-    <img src="https://img.shields.io/badge/Gantt_Chart-Link-blue?style=for-the-badge&logoColor=white" alt="Gantt Chart">
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/CSIT327%20-%20IM2%20-%20Inventory%20Management.xlsx">
+    <img src="https://img.shields.io/badge/Gantt_Chart-Excel_Link-blue?style=for-the-badge&logoColor=white" alt="Gantt Chart">
+  </a>
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/CSIT327%20-%20IM2%20-%20Inventory%20Management.pdf">
+    <img src="https://img.shields.io/badge/Gantt_Chart-PDF_Link-blue?style=for-the-badge&logoColor=white" alt="Gantt Chart">
   </a>
   <a href="https://www.figma.com/design/nyYnjGlbCABuGWIPmFymka/CSIT327---IM2?node-id=0-1&t=BPofXEUuE6bjK9Jm-1/">
     <img src="https://img.shields.io/badge/UI/UX_Design-Link-red?style=for-the-badge&logoColor=white" alt="UI/UX Design">
   </a>
-  <a href="https://cebuinstituteoftechnology-my.sharepoint.com/:w:/g/personal/marckramon_paraiso_cit_edu/EYQtCohhc-VDkgTC3Q5cQhYB5ZMT6K4dkP-LCZpfuHGpuw?e=567EA4">
-    <img src="https://img.shields.io/badge/Functional_Requirements-Link-green?style=for-the-badge&logoColor=white" alt="Functional Requirements">
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/Inventory-Management-System-Documentation.docx">
+    <img src="https://img.shields.io/badge/Functional_Requirements-WORD_Link-green?style=for-the-badge&logoColor=white" alt="Functional Requirements">
   </a>
-  <a href="https://lucid.app/lucidchart/a59bbdeb-15ea-4baf-9540-da18f904eed9/edit?viewport_loc=-1432%2C-290%2C2020%2C980%2C0_0&invitationId=inv_dde9340a-b2f5-4d96-9bf8-45fa68c3e9dd">
-    <img src="https://img.shields.io/badge/ERD-Link-pink?style=for-the-badge&logoColor=white" alt="ERD">
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/Inventory-Management-System-Documentation.pdf">
+    <img src="https://img.shields.io/badge/Functional_Requirements-PDF_Link-green?style=for-the-badge&logoColor=white" alt="Functional Requirements">
+  </a>
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/Inventory-Management-System-ERD.pdf">
+    <img src="https://img.shields.io/badge/ERD-PDF_Link-pink?style=for-the-badge&logoColor=white" alt="ERD">
   </a>
 </div>
 
