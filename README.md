@@ -56,7 +56,7 @@ To get started with StockHub, follow these steps:
   <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/CSIT327%20-%20IM2%20-%20Inventory%20Management.pdf">
     <img src="https://img.shields.io/badge/Gantt_Chart-PDF_Link-blue?style=for-the-badge&logoColor=white" alt="Gantt Chart">
   </a>
-  <a href="https://www.figma.com/design/nyYnjGlbCABuGWIPmFymka/CSIT327---IM2?node-id=0-1&t=BPofXEUuE6bjK9Jm-1/">
+  <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/Inventory-Management-System-UI_UX.pdf">
     <img src="https://img.shields.io/badge/UI/UX_Design-Link-red?style=for-the-badge&logoColor=white" alt="UI/UX Design">
   </a>
   <a href="https://github.com/MarckRamon/StockHub/blob/main/Documentation/Inventory-Management-System-Documentation.docx">
